@@ -3,62 +3,43 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
-    public function run(): void
+    public function run()
     {
-        DB::table('users')->insert([
+        User::insert([
             [
-                'nome' => 'Admin Teste',
-                'email' => 'admin@teste.com',
-                'senha_hash' => Hash::make('admin123'),
-                'ativo' => true,
-                'id_escola' => null
+                'nome' => 'Aluno Exemplo',
+                'email' => 'aluno@escola.com',
+                'telefone' => '11999999999',
+                'data_nascimento' => '2010-05-15',
+                'senha_hash' => Hash::make('senha123'),
+                'id_escola' => 1,
+                'id_cantina' => null,
+                'ativo' => true
             ],
             [
-                'nome' => 'Gestor SP',
-                'email' => 'gestor.sp@teste.com',
+                'nome' => 'Responsavel Exemplo',
+                'email' => 'responsavel@escola.com',
+                'telefone' => '11988888888',
+                'data_nascimento' => '1980-02-20',
                 'senha_hash' => Hash::make('senha123'),
-                'ativo' => true,
-                'id_escola' => 1
+                'id_escola' => null,
+                'id_cantina' => null,
+                'ativo' => true
             ],
             [
-                'nome' => 'Gestor RJ',
-                'email' => 'gestor.rj@teste.com',
+                'nome' => 'Admin Exemplo',
+                'email' => 'admin@escola.com',
+                'telefone' => '11977777777',
+                'data_nascimento' => '1990-01-01',
                 'senha_hash' => Hash::make('senha123'),
-                'ativo' => true,
-                'id_escola' => 2
-            ],
-            [
-                'nome' => 'Responsavel João',
-                'email' => 'resp.joao@teste.com',
-                'senha_hash' => Hash::make('senha123'),
-                'ativo' => true,
-                'id_escola' => null
-            ],
-            [
-                'nome' => 'Responsavel Maria',
-                'email' => 'resp.maria@teste.com',
-                'senha_hash' => Hash::make('senha123'),
-                'ativo' => true,
-                'id_escola' => null
-            ],
-            [
-                'nome' => 'Aluno Pedro',
-                'email' => 'aluno.pedro@teste.com',
-                'senha_hash' => Hash::make('senha123'),
-                'ativo' => true,
-                'id_escola' => 1
-            ],
-            [
-                'nome' => 'Aluno Ana',
-                'email' => 'aluno.ana@teste.com',
-                'senha_hash' => Hash::make('senha123'),
-                'ativo' => true,
-                'id_escola' => 2
+                'id_escola' => null,
+                'id_cantina' => null,
+                'ativo' => true
             ],
         ]);
     }

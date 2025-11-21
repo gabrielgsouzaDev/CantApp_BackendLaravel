@@ -3,17 +3,16 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\Estoque;
 
 class EstoqueSeeder extends Seeder
 {
-    public function run(): void
+    public function run()
     {
-        DB::table('tb_estoque')->insert([
+        Estoque::insert([
             ['id_produto' => 1, 'quantidade' => 50],
             ['id_produto' => 2, 'quantidade' => 30],
-            ['id_produto' => 3, 'quantidade' => 40],
-            ['id_produto' => 4, 'quantidade' => 60],
+            ['id_produto' => 3, 'quantidade' => 20],
         ]);
     }
 }

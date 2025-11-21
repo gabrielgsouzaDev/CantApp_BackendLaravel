@@ -3,15 +3,15 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\Cantina;
 
 class CantinaSeeder extends Seeder
 {
-    public function run(): void
+    public function run()
     {
-        DB::table('tb_cantina')->insert([
-            ['id_escola' => 1, 'nome' => 'Cantina SP', 'hr_abertura' => '07:00:00', 'hr_fechamento' => '15:00:00'],
-            ['id_escola' => 2, 'nome' => 'Cantina RJ', 'hr_abertura' => '07:30:00', 'hr_fechamento' => '16:00:00'],
+        Cantina::insert([
+            ['nome' => 'Cantina Central', 'id_escola' => 1, 'hr_abertura' => '07:00:00', 'hr_fechamento' => '17:00:00'],
+            ['nome' => 'Cantina Nova', 'id_escola' => 2, 'hr_abertura' => '07:30:00', 'hr_fechamento' => '16:30:00'],
         ]);
     }
 }

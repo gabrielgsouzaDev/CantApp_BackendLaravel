@@ -3,15 +3,15 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\Plano;
 
 class PlanoSeeder extends Seeder
 {
-    public function run(): void
+    public function run()
     {
-        DB::table('tb_plano')->insert([
-            ['nome' => 'Plano Básico', 'preco_mensal' => 100.00, 'qtd_max_alunos' => 100, 'qtd_max_cantinas' => 2],
-            ['nome' => 'Plano Premium', 'preco_mensal' => 200.00, 'qtd_max_alunos' => 200, 'qtd_max_cantinas' => 5],
+        Plano::insert([
+            ['nome' => 'Plano Básico', 'preco_mensal' => 150.00, 'qtd_max_alunos' => 500, 'qtd_max_cantinas' => 1],
+            ['nome' => 'Plano Avançado', 'preco_mensal' => 300.00, 'qtd_max_alunos' => 1000, 'qtd_max_cantinas' => 2],
         ]);
     }
 }
