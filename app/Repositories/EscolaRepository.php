@@ -21,14 +21,20 @@ class EscolaRepository
         return Escola::create($data);
     }
 
-    public function update(int $id, array $data): bool
+    public function update(int $id, array $data): ?Escola
     {
-        $escola = Escola::findOrFail($id);
-        return $escola->update($data);
+        $escola = Escola::find($id);
+        if (!$escola) return null;
+
+        $escola->update($data);
+        return $escola;
     }
 
     public function delete(int $id): bool
     {
-        return Escola::destroy($id);
+        $escola = Escola::find($id);
+        if (!$escola) return false;
+
+        return $escola->delete();
     }
 }

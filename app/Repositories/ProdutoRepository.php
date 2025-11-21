@@ -16,24 +16,25 @@ class ProdutoRepository
         return Produto::find($id);
     }
 
-    public function findByCantina(int $idCantina)
-    {
-        return Produto::where('id_cantina', $idCantina)->get();
-    }
-
     public function create(array $data): Produto
     {
         return Produto::create($data);
     }
 
-    public function update(int $id, array $data): bool
+    public function update(int $id, array $data): ?Produto
     {
-        $produto = Produto::findOrFail($id);
-        return $produto->update($data);
+        $produto = Produto::find($id);
+        if (!$produto) return null;
+
+        $produto->update($data);
+        return $produto;
     }
 
     public function delete(int $id): bool
     {
-        return Produto::destroy($id);
+        $produto = Produto::find($id);
+        if (!$produto) return false;
+
+        return $produto->delete();
     }
 }

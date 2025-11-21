@@ -8,59 +8,40 @@ class PedidoRepository
 {
     public function all()
     {
-        return Pedido::with(['aluno', 'responsavel', 'produtos'])->get();
+        return Pedido::all();
     }
 
     public function find(int $id): ?Pedido
     {
-        return Pedido::with(['aluno', 'responsavel', 'produtos'])->find($id);
+        return Pedido::find($id);
     }
 
     public function create(array $data): Pedido
     {
-        $pedido = Pedido::create([
-            'aluno_id' => $data['aluno_id'] ?? null,
-            'responsavel_id' => $data['responsavel_id'] ?? null,
-            'status' => $data['status'] ?? 'pendente',
-            'valor_total' => 0
-        ]);
-
-        $total = 0;
-
-        foreach ($data['produtos'] as $p) {
-            $produto = $p['produto']; // Aqui o Service já passa o produto correto
-            $subtotal = $produto->preco * $p['quantidade'];
-            $total += $subtotal;
-
-            $pedido->produtos()->attach($produto->id, [
-                'quantidade' => $p['quantidade'],
-                'subtotal' => $subtotal
-            ]);
-        }
-
-        $pedido->update(['valor_total' => $total]);
-
-        return $pedido->load(['produtos']);
+        return Pedido::create($data);
     }
 
-    public function update(int $id, array $data): bool
+    public function update(int $id, array $data): ?Pedido
     {
-        $pedido = Pedido::findOrFail($id);
-        return $pedido->update($data);
+        $pedido = Pedido::find($id);
+        if (!$pedido) return null;
+
+        $pedido->update($data);
+        return $pedido;
     }
 
     public function delete(int $id): bool
     {
-        return Pedido::destroy($id);
+        $pedido = Pedido::find($id);
+        if (!$pedido) return false;
+
+        return $pedido->delete();
     }
 
-    public function findByDestinatario(string $tipo, int $id)
+    /** Produtos do pedido */
+    public function produtos(int $id)
     {
-        if ($tipo === 'aluno') {
-            return Pedido::where('aluno_id', $id)->get();
-        } elseif ($tipo === 'responsavel') {
-            return Pedido::where('responsavel_id', $id)->get();
-        }
-        return collect([]);
+        $pedido = Pedido::find($id);
+        return $pedido ? $pedido->produtos : null;
     }
 }

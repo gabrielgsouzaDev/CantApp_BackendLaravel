@@ -16,24 +16,32 @@ class CantinaRepository
         return Cantina::find($id);
     }
 
-    public function findByEscola(int $idEscola)
-    {
-        return Cantina::where('id_escola', $idEscola)->get();
-    }
-
     public function create(array $data): Cantina
     {
         return Cantina::create($data);
     }
 
-    public function update(int $id, array $data): bool
+    public function update(int $id, array $data): ?Cantina
     {
-        $cantina = Cantina::findOrFail($id);
-        return $cantina->update($data);
+        $cantina = Cantina::find($id);
+        if (!$cantina) return null;
+
+        $cantina->update($data);
+        return $cantina;
     }
 
     public function delete(int $id): bool
     {
-        return Cantina::destroy($id);
+        $cantina = Cantina::find($id);
+        if (!$cantina) return false;
+
+        return $cantina->delete();
+    }
+
+    /** Produtos da cantina */
+    public function produtos(int $id)
+    {
+        $cantina = Cantina::find($id);
+        return $cantina ? $cantina->produtos : null;
     }
 }

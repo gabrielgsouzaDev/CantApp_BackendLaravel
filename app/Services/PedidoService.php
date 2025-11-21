@@ -3,44 +3,43 @@
 namespace App\Services;
 
 use App\Repositories\PedidoRepository;
-use App\Models\Produto;
 
 class PedidoService
 {
-    protected $repo;
+    protected $repository;
 
-    public function __construct(PedidoRepository $repo)
+    public function __construct(PedidoRepository $repository)
     {
-        $this->repo = $repo;
+        $this->repository = $repository;
     }
 
-    public function listar()
+    public function all()
     {
-        return $this->repo->all();
+        return $this->repository->all();
     }
 
-    public function listarPorDestinatario(string $tipo, int $id)
+    public function find(int $id)
     {
-        return $this->repo->findByDestinatario($tipo, $id);
+        return $this->repository->find($id);
     }
 
-    public function criar(array $dados)
+    public function create(array $data)
     {
-        // Validar produtos
-        foreach ($dados['produtos'] as &$p) {
-            $p['produto'] = Produto::findOrFail($p['id']);
-        }
-
-        return $this->repo->create($dados);
+        return $this->repository->create($data);
     }
 
-    public function atualizarStatus(int $id, string $status)
+    public function update(int $id, array $data)
     {
-        return $this->repo->update($id, ['status' => $status]);
+        return $this->repository->update($id, $data);
     }
 
-    public function deletar(int $id)
+    public function delete(int $id)
     {
-        return $this->repo->delete($id);
+        return $this->repository->delete($id);
+    }
+
+    public function produtos(int $id)
+    {
+        return $this->repository->produtos($id);
     }
 }

@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\EscolaService;
+use App\Services\ControleParentalService;
 use Illuminate\Http\Request;
 
-class EscolaController extends Controller
+class ControleParentalController extends Controller
 {
     protected $service;
 
-    public function __construct(EscolaService $service)
+    public function __construct(ControleParentalService $service)
     {
         $this->service = $service;
     }

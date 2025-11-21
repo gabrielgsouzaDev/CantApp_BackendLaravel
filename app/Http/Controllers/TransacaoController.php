@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\EscolaService;
+use App\Services\TransacaoService;
 use Illuminate\Http\Request;
 
-class EscolaController extends Controller
+class TransacaoController extends Controller
 {
     protected $service;
 
-    public function __construct(EscolaService $service)
+    public function __construct(TransacaoService $service)
     {
         $this->service = $service;
     }
@@ -27,15 +27,5 @@ class EscolaController extends Controller
     public function store(Request $request)
     {
         return response()->json($this->service->create($request->all()), 201);
-    }
-
-    public function update(Request $request, $id)
-    {
-        return response()->json($this->service->update($id, $request->all()));
-    }
-
-    public function destroy($id)
-    {
-        return response()->json($this->service->delete($id));
     }
 }

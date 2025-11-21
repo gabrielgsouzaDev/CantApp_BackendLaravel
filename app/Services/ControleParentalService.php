@@ -2,13 +2,13 @@
 
 namespace App\Services;
 
-use App\Repositories\ProdutoRepository;
+use App\Repositories\ControleParentalRepository;
 
-class ProdutoService
+class ControleParentalService
 {
     protected $repository;
 
-    public function __construct(ProdutoRepository $repository)
+    public function __construct(ControleParentalRepository $repository)
     {
         $this->repository = $repository;
     }

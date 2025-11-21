@@ -3,34 +3,45 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Pedido extends Model
 {
-    protected $table = 'pedidos';
+    protected $table = 'tb_pedido';
+    protected $primaryKey = 'id_pedido';
 
     protected $fillable = [
-        'aluno_id',
-        'responsavel_id',
+        'id_cantina',
+        'id_comprador',
+        'id_destinatario',
+        'valor_total',
         'status',
-        'valor_total'
     ];
 
-    public function aluno(): BelongsTo
+    public $timestamps = true;
+
+    public function comprador()
     {
-        return $this->belongsTo(Aluno::class, 'aluno_id');
+        return $this->belongsTo(User::class, 'id_comprador', 'id');
     }
 
-    public function responsavel(): BelongsTo
+    public function destinatario()
     {
-        return $this->belongsTo(Responsavel::class, 'responsavel_id');
+        return $this->belongsTo(User::class, 'id_destinatario', 'id');
     }
 
-    public function produtos(): BelongsToMany
+    public function cantina()
     {
-        return $this->belongsToMany(Produto::class, 'pedido_produto')
-            ->withPivot(['quantidade', 'subtotal'])
-            ->withTimestamps();
+        return $this->belongsTo(Cantina::class, 'id_cantina', 'id_cantina');
+    }
+
+    public function produtos()
+    {
+        return $this->belongsToMany(
+            Produto::class,
+            'tb_item_pedido',
+            'id_pedido',
+            'id_produto'
+        )->withPivot('quantidade', 'preco_unitario')
+         ->withTimestamps();
     }
 }

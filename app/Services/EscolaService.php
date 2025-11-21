@@ -6,30 +6,35 @@ use App\Repositories\EscolaRepository;
 
 class EscolaService
 {
-    protected $repo;
+    protected $repository;
 
-    public function __construct(EscolaRepository $repo)
+    public function __construct(EscolaRepository $repository)
     {
-        $this->repo = $repo;
+        $this->repository = $repository;
     }
 
-    public function listar()
+    public function all()
     {
-        return $this->repo->all();
+        return $this->repository->all();
     }
 
-    public function criar(array $dados)
+    public function find(int $id)
     {
-        return $this->repo->create($dados);
+        return $this->repository->find($id);
     }
 
-    public function atualizar(int $id, array $dados)
+    public function create(array $data)
     {
-        return $this->repo->update($id, $dados);
+        return $this->repository->create($data);
     }
 
-    public function deletar(int $id)
+    public function update(int $id, array $data)
     {
-        return $this->repo->delete($id);
+        return $this->repository->update($id, $data);
+    }
+
+    public function delete(int $id)
+    {
+        return $this->repository->delete($id);
     }
 }

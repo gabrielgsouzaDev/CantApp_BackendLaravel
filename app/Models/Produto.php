@@ -4,17 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * Class Produto
- *
- * @property int $id_produto
- * @property int $id_cantina
- * @property string $nome
- * @property float $preco
- * @property bool $ativo
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- */
 class Produto extends Model
 {
     protected $table = 'tb_produto';
@@ -35,7 +24,6 @@ class Produto extends Model
 
     public $timestamps = true;
 
-    // Relacionamentos
     public function cantina()
     {
         return $this->belongsTo(Cantina::class, 'id_cantina', 'id_cantina');
@@ -45,9 +33,10 @@ class Produto extends Model
     {
         return $this->belongsToMany(
             Pedido::class,
-            'tb_item_pedido', // tabela pivot
+            'tb_item_pedido',
             'id_produto',
             'id_pedido'
-        )->withPivot('quantidade')->withTimestamps();
+        )->withPivot('quantidade', 'preco_unitario')
+         ->withTimestamps();
     }
 }

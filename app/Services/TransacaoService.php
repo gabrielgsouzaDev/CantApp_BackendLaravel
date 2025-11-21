@@ -2,13 +2,13 @@
 
 namespace App\Services;
 
-use App\Repositories\ProdutoRepository;
+use App\Repositories\TransacaoRepository;
 
-class ProdutoService
+class TransacaoService
 {
     protected $repository;
 
-    public function __construct(ProdutoRepository $repository)
+    public function __construct(TransacaoRepository $repository)
     {
         $this->repository = $repository;
     }
@@ -25,6 +25,8 @@ class ProdutoService
 
     public function create(array $data)
     {
+        // Aqui você pode incluir regras de negócio, tipo:
+        // validar saldo, tipo de transação etc.
         return $this->repository->create($data);
     }
 

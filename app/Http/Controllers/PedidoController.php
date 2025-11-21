@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Services\PedidoService;
-use App\Helpers\ResponseHelper;
+use Illuminate\Http\Request;
 
 class PedidoController extends Controller
 {
@@ -17,46 +16,26 @@ class PedidoController extends Controller
 
     public function index()
     {
-        return ResponseHelper::success($this->service->listar());
-    }
-
-    public function store(Request $request)
-    {
-        $dados = $request->validate([
-            'aluno_id' => 'nullable|exists:alunos,id',
-            'responsavel_id' => 'nullable|exists:responsaveis,id',
-            'produtos' => 'required|array',
-            'produtos.*.id' => 'required|exists:produtos,id',
-            'produtos.*.quantidade' => 'required|integer|min:1'
-        ]);
-
-        return ResponseHelper::success(
-            $this->service->criar($dados)
-        );
+        return response()->json($this->service->all());
     }
 
     public function show($id)
     {
-        return ResponseHelper::success(
-            $this->service->repo->find($id)
-        );
+        return response()->json($this->service->find($id));
     }
 
-    public function updateStatus(Request $request, $id)
+    public function store(Request $request)
     {
-        $dados = $request->validate([
-            'status' => 'required'
-        ]);
+        return response()->json($this->service->create($request->all()), 201);
+    }
 
-        return ResponseHelper::success(
-            $this->service->atualizarStatus($id, $dados['status'])
-        );
+    public function update(Request $request, $id)
+    {
+        return response()->json($this->service->update($id, $request->all()));
     }
 
     public function destroy($id)
     {
-        return ResponseHelper::success(
-            $this->service->deletar($id)
-        );
+        return response()->json($this->service->delete($id));
     }
 }

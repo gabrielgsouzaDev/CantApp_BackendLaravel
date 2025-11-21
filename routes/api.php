@@ -1,61 +1,109 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
-// Controllers
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\AlunoController;
-use App\Http\Controllers\ResponsavelController;
-use App\Http\Controllers\ProdutoController;
-use App\Http\Controllers\PedidoController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\EscolaController;
 use App\Http\Controllers\CantinaController;
+use App\Http\Controllers\ProdutoController;
+use App\Http\Controllers\PedidoController;
+use App\Http\Controllers\ItemPedidoController;
+use App\Http\Controllers\CarteiraController;
+use App\Http\Controllers\TransacaoController;
+use App\Http\Controllers\ControleParentalController;
 
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
+|
+| Rotas organizadas: listagens públicas, ações que alteram dados sob
+| auth:sanctum. Ajuste middleware conforme sua estratégia de autenticação.
+|
 */
 
-// -------- ADMIN --------
-Route::post('/admin/login', [AdminController::class, 'login']);
-Route::get('/admins',      [AdminController::class, 'index']);
-Route::post('/admins',     [AdminController::class, 'store']);
+// -------- AUTH (public) --------
+Route::post('/login', [AuthController::class, 'login']);
 
-// -------- ALUNOS --------
-Route::get('/alunos',          [AlunoController::class, 'index']);
-Route::post('/alunos',         [AlunoController::class, 'store']);
-Route::get('/alunos/{id}',     [AlunoController::class, 'show']);
-Route::put('/alunos/{id}',     [AlunoController::class, 'update']);
-Route::delete('/alunos/{id}',  [AlunoController::class, 'destroy']);
+// logout precisa de autenticação
+Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 
-// -------- RESPONSÁVEIS --------
-Route::get('/responsaveis',          [ResponsavelController::class, 'index']);
-Route::post('/responsaveis',         [ResponsavelController::class, 'store']);
-Route::get('/responsaveis/{id}',     [ResponsavelController::class, 'show']);
-Route::put('/responsaveis/{id}',     [ResponsavelController::class, 'update']);
-Route::delete('/responsaveis/{id}',  [ResponsavelController::class, 'destroy']);
+// -------- PUBLIC READ ROUTES (listagens públicas) --------
+// Users (leitura pública - se quiser proteger, mova para middleware)
+Route::get('/users', [UserController::class, 'index']);
+Route::get('/users/{id}', [UserController::class, 'show']);
 
-// -------- PRODUTOS --------
-Route::get('/produtos',         [ProdutoController::class, 'index']);
-Route::post('/produtos',        [ProdutoController::class, 'store']);
-Route::get('/produtos/{id}',    [ProdutoController::class, 'show']);
-Route::put('/produtos/{id}',    [ProdutoController::class, 'update']);
-Route::delete('/produtos/{id}', [ProdutoController::class, 'destroy']);
+// Escolas
+Route::get('/escolas', [EscolaController::class, 'index']);
+Route::get('/escolas/{id}', [EscolaController::class, 'show']);
 
-// -------- PEDIDOS --------
-Route::get('/pedidos',              [PedidoController::class, 'index']);
-Route::post('/pedidos',             [PedidoController::class, 'store']);
-Route::put('/pedidos/{id}/status',  [PedidoController::class, 'updateStatus']);
+// Cantinas
+Route::get('/cantinas', [CantinaController::class, 'index']);
+Route::get('/cantinas/{id}', [CantinaController::class, 'show']);
+Route::get('/cantinas/escola/{id_escola}', [CantinaController::class, 'listarPorEscola']);
+Route::get('/cantinas/{id}/produtos', [CantinaController::class, 'produtos']); // opcional, útil pro front
 
-// -------- ESCOLAS --------
-Route::get('/escolas',        [EscolaController::class, 'index']);
-Route::post('/escolas',       [EscolaController::class, 'store']);
-Route::get('/escolas/{id}',   [EscolaController::class, 'show']);
-Route::put('/escolas/{id}',   [EscolaController::class, 'update']);
-Route::delete('/escolas/{id}',[EscolaController::class, 'destroy']);
+// Produtos
+Route::get('/produtos', [ProdutoController::class, 'index']);
+Route::get('/produtos/{id}', [ProdutoController::class, 'show']);
 
-// -------- CANTINAS --------
-Route::get('/cantinas',                      [CantinaController::class, 'index']);
-Route::get('/cantinas/escola/{id_escola}',  [CantinaController::class, 'listarPorEscola']);
-Route::get('/cantinas/{id}',                [CantinaController::class, 'show']);
+// Pedidos (consulta pública; se quiser proteger, mova para auth)
+Route::get('/pedidos', [PedidoController::class, 'index']);
+Route::get('/pedidos/{id}', [PedidoController::class, 'show']);
+
+// Controle Parental (leitura)
+Route::get('/controle-parental', [ControleParentalController::class, 'index']);
+Route::get('/controle-parental/{id}', [ControleParentalController::class, 'show']);
+
+// Carteira e Transações (leitura pública limitada — idealmente protegidas)
+Route::get('/carteiras/{id}', [CarteiraController::class, 'show']);
+Route::get('/transacoes', [TransacaoController::class, 'index']);
+Route::get('/transacoes/{id}', [TransacaoController::class, 'show']);
+
+
+// -------- PROTECTED ROUTES (requer auth:sanctum) --------
+Route::middleware('auth:sanctum')->group(function () {
+
+    // Users (criar/atualizar/deletar)
+    Route::post('/users', [UserController::class, 'store']);
+    Route::put('/users/{id}', [UserController::class, 'update']);
+    Route::delete('/users/{id}', [UserController::class, 'destroy']);
+
+    // Escolas (admin/gestor)
+    Route::post('/escolas', [EscolaController::class, 'store']);
+    Route::put('/escolas/{id}', [EscolaController::class, 'update']);
+    Route::delete('/escolas/{id}', [EscolaController::class, 'destroy']);
+
+    // Cantinas (gestor / cantineiro)
+    Route::post('/cantinas', [CantinaController::class, 'store']);
+    Route::put('/cantinas/{id}', [CantinaController::class, 'update']);
+    Route::delete('/cantinas/{id}', [CantinaController::class, 'destroy']);
+
+    // Produtos (cantina)
+    Route::post('/produtos', [ProdutoController::class, 'store']);
+    Route::put('/produtos/{id}', [ProdutoController::class, 'update']);
+    Route::delete('/produtos/{id}', [ProdutoController::class, 'destroy']);
+
+    // Pedidos (criar, atualizar status, deletar)
+    Route::post('/pedidos', [PedidoController::class, 'store']);
+    Route::put('/pedidos/{id}', [PedidoController::class, 'update']); // atualização geral
+    Route::put('/pedidos/{id}/status', [PedidoController::class, 'updateStatus']); // só status
+    Route::delete('/pedidos/{id}', [PedidoController::class, 'destroy']);
+
+    // Itens de Pedido (opcional manipulação direta)
+    Route::post('/item-pedidos', [ItemPedidoController::class, 'store']);
+    Route::put('/item-pedidos/{id}', [ItemPedidoController::class, 'update']);
+    Route::delete('/item-pedidos/{id}', [ItemPedidoController::class, 'destroy']);
+
+    // Carteira & Transacao
+    Route::post('/carteiras', [CarteiraController::class, 'store']);
+    Route::put('/carteiras/{id}', [CarteiraController::class, 'update']);
+    Route::post('/transacoes', [TransacaoController::class, 'store']);
+    Route::put('/transacoes/{id}', [TransacaoController::class, 'update']);
+    Route::delete('/transacoes/{id}', [TransacaoController::class, 'destroy']);
+
+    // Controle Parental
+    Route::post('/controle-parental', [ControleParentalController::class, 'store']);
+    Route::put('/controle-parental/{id}', [ControleParentalController::class, 'update']);
+    Route::delete('/controle-parental/{id}', [ControleParentalController::class, 'destroy']);
+});

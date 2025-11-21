@@ -2,13 +2,13 @@
 
 namespace App\Services;
 
-use App\Repositories\ProdutoRepository;
+use App\Repositories\CarteiraRepository;
 
-class ProdutoService
+class CarteiraService
 {
     protected $repository;
 
-    public function __construct(ProdutoRepository $repository)
+    public function __construct(CarteiraRepository $repository)
     {
         $this->repository = $repository;
     }
@@ -21,6 +21,11 @@ class ProdutoService
     public function find(int $id)
     {
         return $this->repository->find($id);
+    }
+
+    public function findByUser(int $id_user)
+    {
+        return $this->repository->findByUser($id_user);
     }
 
     public function create(array $data)

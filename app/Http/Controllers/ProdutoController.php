@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Services\ProdutoService;
-use App\Helpers\ResponseHelper;
+use Illuminate\Http\Request;
 
 class ProdutoController extends Controller
 {
@@ -17,34 +16,26 @@ class ProdutoController extends Controller
 
     public function index()
     {
-        return ResponseHelper::success($this->service->listar());
-    }
-
-    public function store(Request $request)
-    {
-        $dados = $request->validate([
-            'nome' => 'required',
-            'descricao' => 'required',
-            'preco' => 'required|numeric',
-            'estoque' => 'required|integer',
-            'categoria' => 'required'
-        ]);
-
-        return ResponseHelper::success($this->service->criar($dados));
+        return response()->json($this->service->all());
     }
 
     public function show($id)
     {
-        return ResponseHelper::success($this->service->repo->find($id));
+        return response()->json($this->service->find($id));
+    }
+
+    public function store(Request $request)
+    {
+        return response()->json($this->service->create($request->all()), 201);
     }
 
     public function update(Request $request, $id)
     {
-        return ResponseHelper::success($this->service->atualizar($id, $request->all()));
+        return response()->json($this->service->update($id, $request->all()));
     }
 
     public function destroy($id)
     {
-        return ResponseHelper::success($this->service->deletar($id));
+        return response()->json($this->service->delete($id));
     }
 }
