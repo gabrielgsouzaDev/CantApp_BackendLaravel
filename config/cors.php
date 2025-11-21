@@ -7,23 +7,34 @@ return [
     | Cross-Origin Resource Sharing (CORS) Configuration
     |--------------------------------------------------------------------------
     |
-    | Aqui você define quais origens podem acessar sua API, métodos e headers
-    | permitidos, além de outras opções importantes para front e mobile.
+    | Configuração para permitir que seu frontend faça requisições para a API
+    | sem bloqueio do navegador (CORS). 
     |
     */
 
-    'paths' => ['api/*'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
-    'allowed_methods' => ['*'], // ou ['GET','POST','PUT','DELETE'] para mais segurança
+    // Permite todos os métodos HTTP para simplificar o desenvolvimento
+    'allowed_methods' => ['*'], 
+
+    // Origens permitidas: front local e produção
     'allowed_origins' => [
         'https://cantapp-client.vercel.app',
         'https://cantapp-admin.vercel.app',
-        'http://localhost:3000',       // front dev local
-        'http://127.0.0.1:3000'        // front dev local alternativo
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
     ],
+
     'allowed_origins_patterns' => [],
+
+    // Permite todos os headers para frontend
     'allowed_headers' => ['*'],
+
     'exposed_headers' => [],
+
+    // Cache de pré-flight request (em segundos)
     'max_age' => 0,
-    'supports_credentials' => true, // necessário se usar cookies ou autenticação
+
+    // Necessário para cookies/sessões/autenticação via front
+    'supports_credentials' => true,
 ];
