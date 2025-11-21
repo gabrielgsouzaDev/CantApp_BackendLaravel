@@ -16,7 +16,7 @@ return [
 
     'allowed_methods' => ['*'], // ou ['GET','POST','PUT','DELETE'] para mais segurança
     'allowed_origins' => [
-        'https://tcc-ctnapp-app.vercel.app',
+        'https://cantapp-client.vercel.app',
         'https://cantapp-admin.vercel.app',
         'http://localhost:3000',       // front dev local
         'http://127.0.0.1:3000'        // front dev local alternativo
