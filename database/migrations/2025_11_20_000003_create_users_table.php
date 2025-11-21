@@ -13,14 +13,23 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
+            $table->string('nome', 100);
+            $table->string('email', 150)->unique();
+            $table->string('senha_hash', 255);
+            $table->unsignedBigInteger('id_escola')->nullable();
+            $table->boolean('ativo')->default(true);
             $table->timestamps();
+            $table->timestamp('deleted_at')->nullable();
+
+            // Foreign key
+            $table->foreign('id_escola')
+                  ->references('id_escola')
+                  ->on('tb_escola')
+                  ->onDelete('set null')
+                  ->onUpdate('cascade');
         });
 
+        // Se quiser, pode criar aqui também password resets e sessions
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
             $table->string('token');
@@ -42,8 +51,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('users');
     }
 };
