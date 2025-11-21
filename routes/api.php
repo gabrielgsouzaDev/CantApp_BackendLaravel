@@ -13,16 +13,6 @@ use App\Http\Controllers\PedidoController;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/test-db', function() {
-    try {
-        \DB::connection()->getPdo();
-        return 'Conexão OK';
-    } catch (\Exception $e) {
-        return $e->getMessage();
-    }
-});
-
-
 // -------- ADMIN --------
 Route::post('/admin/login', [AdminController::class, 'login']);
 Route::get('/admins',          [AdminController::class, 'index']);
