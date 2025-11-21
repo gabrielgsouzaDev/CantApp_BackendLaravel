@@ -6,35 +6,44 @@ use App\Models\Transacao;
 
 class TransacaoRepository
 {
+    protected $model;
+
+    public function __construct(Transacao $model)
+    {
+        $this->model = $model;
+    }
+
     public function all()
     {
-        return Transacao::all();
+        return $this->model->with(['carteira', 'autor', 'aprovador'])->get();
     }
 
-    public function find(int $id): ?Transacao
+    public function find($id)
     {
-        return Transacao::find($id);
+        return $this->model->with(['carteira', 'autor', 'aprovador'])->find($id);
     }
 
-    public function create(array $data): Transacao
+    public function create(array $data)
     {
-        return Transacao::create($data);
+        return $this->model->create($data);
     }
 
-    public function update(int $id, array $data): ?Transacao
+    public function update($id, array $data)
     {
-        $transacao = Transacao::find($id);
-        if (!$transacao) return null;
-
-        $transacao->update($data);
-        return $transacao;
+        $transacao = $this->model->find($id);
+        if ($transacao) {
+            $transacao->update($data);
+            return $transacao;
+        }
+        return null;
     }
 
-    public function delete(int $id): bool
+    public function delete($id)
     {
-        $transacao = Transacao::find($id);
-        if (!$transacao) return false;
-
-        return $transacao->delete();
+        $transacao = $this->model->find($id);
+        if ($transacao) {
+            return $transacao->delete();
+        }
+        return false;
     }
 }

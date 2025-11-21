@@ -6,35 +6,44 @@ use App\Models\ControleParental;
 
 class ControleParentalRepository
 {
+    protected $model;
+
+    public function __construct(ControleParental $model)
+    {
+        $this->model = $model;
+    }
+
     public function all()
     {
-        return ControleParental::all();
+        return $this->model->with(['responsavel', 'aluno', 'produtos'])->get();
     }
 
-    public function find(int $id): ?ControleParental
+    public function find($id)
     {
-        return ControleParental::find($id);
+        return $this->model->with(['responsavel', 'aluno', 'produtos'])->find($id);
     }
 
-    public function create(array $data): ControleParental
+    public function create(array $data)
     {
-        return ControleParental::create($data);
+        return $this->model->create($data);
     }
 
-    public function update(int $id, array $data): ?ControleParental
+    public function update($id, array $data)
     {
-        $controle = ControleParental::find($id);
-        if (!$controle) return null;
-
-        $controle->update($data);
-        return $controle;
+        $controle = $this->model->find($id);
+        if ($controle) {
+            $controle->update($data);
+            return $controle;
+        }
+        return null;
     }
 
-    public function delete(int $id): bool
+    public function delete($id)
     {
-        $controle = ControleParental::find($id);
-        if (!$controle) return false;
-
-        return $controle->delete();
+        $controle = $this->model->find($id);
+        if ($controle) {
+            return $controle->delete();
+        }
+        return false;
     }
 }

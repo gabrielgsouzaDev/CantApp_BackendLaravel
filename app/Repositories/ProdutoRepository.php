@@ -6,35 +6,44 @@ use App\Models\Produto;
 
 class ProdutoRepository
 {
+    protected $model;
+
+    public function __construct(Produto $model)
+    {
+        $this->model = $model;
+    }
+
     public function all()
     {
-        return Produto::all();
+        return $this->model->with(['cantina', 'itensPedido', 'estoque', 'controleParental'])->get();
     }
 
-    public function find(int $id): ?Produto
+    public function find($id)
     {
-        return Produto::find($id);
+        return $this->model->with(['cantina', 'itensPedido', 'estoque', 'controleParental'])->find($id);
     }
 
-    public function create(array $data): Produto
+    public function create(array $data)
     {
-        return Produto::create($data);
+        return $this->model->create($data);
     }
 
-    public function update(int $id, array $data): ?Produto
+    public function update($id, array $data)
     {
-        $produto = Produto::find($id);
-        if (!$produto) return null;
-
-        $produto->update($data);
-        return $produto;
+        $produto = $this->model->find($id);
+        if ($produto) {
+            $produto->update($data);
+            return $produto;
+        }
+        return null;
     }
 
-    public function delete(int $id): bool
+    public function delete($id)
     {
-        $produto = Produto::find($id);
-        if (!$produto) return false;
-
-        return $produto->delete();
+        $produto = $this->model->find($id);
+        if ($produto) {
+            return $produto->delete();
+        }
+        return false;
     }
 }

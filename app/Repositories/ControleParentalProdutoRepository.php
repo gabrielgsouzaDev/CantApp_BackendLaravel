@@ -6,35 +6,44 @@ use App\Models\ControleParentalProduto;
 
 class ControleParentalProdutoRepository
 {
+    protected $model;
+
+    public function __construct(ControleParentalProduto $model)
+    {
+        $this->model = $model;
+    }
+
     public function all()
     {
-        return ControleParentalProduto::all();
+        return $this->model->with(['controleParental', 'produto'])->get();
     }
 
-    public function find(int $id): ?ControleParentalProduto
+    public function find($id)
     {
-        return ControleParentalProduto::find($id);
+        return $this->model->with(['controleParental', 'produto'])->find($id);
     }
 
-    public function create(array $data): ControleParentalProduto
+    public function create(array $data)
     {
-        return ControleParentalProduto::create($data);
+        return $this->model->create($data);
     }
 
-    public function update(int $id, array $data): ?ControleParentalProduto
+    public function update($id, array $data)
     {
-        $controleProduto = ControleParentalProduto::find($id);
-        if (!$controleProduto) return null;
-
-        $controleProduto->update($data);
-        return $controleProduto;
+        $item = $this->model->find($id);
+        if ($item) {
+            $item->update($data);
+            return $item;
+        }
+        return null;
     }
 
-    public function delete(int $id): bool
+    public function delete($id)
     {
-        $controleProduto = ControleParentalProduto::find($id);
-        if (!$controleProduto) return false;
-
-        return $controleProduto->delete();
+        $item = $this->model->find($id);
+        if ($item) {
+            return $item->delete();
+        }
+        return false;
     }
 }

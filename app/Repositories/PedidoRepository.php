@@ -6,42 +6,44 @@ use App\Models\Pedido;
 
 class PedidoRepository
 {
+    protected $model;
+
+    public function __construct(Pedido $model)
+    {
+        $this->model = $model;
+    }
+
     public function all()
     {
-        return Pedido::all();
+        return $this->model->with(['cantina', 'comprador', 'destinatario', 'itens'])->get();
     }
 
-    public function find(int $id): ?Pedido
+    public function find($id)
     {
-        return Pedido::find($id);
+        return $this->model->with(['cantina', 'comprador', 'destinatario', 'itens'])->find($id);
     }
 
-    public function create(array $data): Pedido
+    public function create(array $data)
     {
-        return Pedido::create($data);
+        return $this->model->create($data);
     }
 
-    public function update(int $id, array $data): ?Pedido
+    public function update($id, array $data)
     {
-        $pedido = Pedido::find($id);
-        if (!$pedido) return null;
-
-        $pedido->update($data);
-        return $pedido;
+        $pedido = $this->model->find($id);
+        if ($pedido) {
+            $pedido->update($data);
+            return $pedido;
+        }
+        return null;
     }
 
-    public function delete(int $id): bool
+    public function delete($id)
     {
-        $pedido = Pedido::find($id);
-        if (!$pedido) return false;
-
-        return $pedido->delete();
-    }
-
-    /** Produtos do pedido */
-    public function produtos(int $id)
-    {
-        $pedido = Pedido::find($id);
-        return $pedido ? $pedido->produtos : null;
+        $pedido = $this->model->find($id);
+        if ($pedido) {
+            return $pedido->delete();
+        }
+        return false;
     }
 }

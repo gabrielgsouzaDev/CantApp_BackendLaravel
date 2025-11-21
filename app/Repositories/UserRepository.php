@@ -6,66 +6,70 @@ use App\Models\User;
 
 class UserRepository
 {
-    /** Listar todos usuários */
+    protected $model;
+
+    public function __construct(User $model)
+    {
+        $this->model = $model;
+    }
+
     public function all()
     {
-        return User::all();
+        return $this->model->with([
+            'roles', 
+            'escola', 
+            'cantina', 
+            'carteira', 
+            'transacoesFeitas', 
+            'transacoesAprovadas', 
+            'dependentes', 
+            'responsaveis', 
+            'controleParentalComoResponsavel', 
+            'controleParentalComoAluno', 
+            'pedidosFeitos', 
+            'pedidosRecebidos'
+        ])->get();
     }
 
-    /** Buscar por ID */
-    public function find(int $id): ?User
+    public function find($id)
     {
-        return User::find($id);
+        return $this->model->with([
+            'roles', 
+            'escola', 
+            'cantina', 
+            'carteira', 
+            'transacoesFeitas', 
+            'transacoesAprovadas', 
+            'dependentes', 
+            'responsaveis', 
+            'controleParentalComoResponsavel', 
+            'controleParentalComoAluno', 
+            'pedidosFeitos', 
+            'pedidosRecebidos'
+        ])->find($id);
     }
 
-    /** Buscar por email */
-    public function findByEmail(string $email): ?User
+    public function create(array $data)
     {
-        return User::where('email', $email)->first();
+        return $this->model->create($data);
     }
 
-    /** Criar usuário */
-    public function create(array $data): User
+    public function update($id, array $data)
     {
-        return User::create($data);
-    }
-
-    /** Atualizar usuário */
-    public function update(int $id, array $data): ?User
-    {
-        $user = User::find($id);
-
-        if (!$user) {
-            return null;
+        $user = $this->model->find($id);
+        if ($user) {
+            $user->update($data);
+            return $user;
         }
-
-        $user->update($data);
-        return $user;
+        return null;
     }
 
-    /** Deletar usuário */
-    public function delete(int $id): bool
+    public function delete($id)
     {
-        $user = User::find($id);
-
-        if (!$user) {
-            return false;
+        $user = $this->model->find($id);
+        if ($user) {
+            return $user->delete();
         }
-
-        return $user->delete();
-    }
-
-    /** Buscar usuários por escola */
-    public function findByEscola(int $id_escola)
-    {
-        return User::where('id_escola', $id_escola)->get();
-    }
-
-    /** Buscar dependentes de um responsável */
-    public function findDependentes(int $id_responsavel)
-    {
-        return User::whereHas('dependentes', function($q) use ($id_responsavel) {
-            $q->where('id_responsavel', $id_responsavel);
-        })->get();
+        return false;
     }
 }

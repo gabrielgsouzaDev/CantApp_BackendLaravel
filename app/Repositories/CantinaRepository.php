@@ -6,42 +6,44 @@ use App\Models\Cantina;
 
 class CantinaRepository
 {
+    protected $model;
+
+    public function __construct(Cantina $model)
+    {
+        $this->model = $model;
+    }
+
     public function all()
     {
-        return Cantina::all();
+        return $this->model->with(['escola', 'produtos', 'pedidos', 'usuarios'])->get();
     }
 
-    public function find(int $id): ?Cantina
+    public function find($id)
     {
-        return Cantina::find($id);
+        return $this->model->with(['escola', 'produtos', 'pedidos', 'usuarios'])->find($id);
     }
 
-    public function create(array $data): Cantina
+    public function create(array $data)
     {
-        return Cantina::create($data);
+        return $this->model->create($data);
     }
 
-    public function update(int $id, array $data): ?Cantina
+    public function update($id, array $data)
     {
-        $cantina = Cantina::find($id);
-        if (!$cantina) return null;
-
-        $cantina->update($data);
-        return $cantina;
+        $cantina = $this->model->find($id);
+        if ($cantina) {
+            $cantina->update($data);
+            return $cantina;
+        }
+        return null;
     }
 
-    public function delete(int $id): bool
+    public function delete($id)
     {
-        $cantina = Cantina::find($id);
-        if (!$cantina) return false;
-
-        return $cantina->delete();
-    }
-
-    /** Produtos da cantina */
-    public function produtos(int $id)
-    {
-        $cantina = Cantina::find($id);
-        return $cantina ? $cantina->produtos : null;
+        $cantina = $this->model->find($id);
+        if ($cantina) {
+            return $cantina->delete();
+        }
+        return false;
     }
 }

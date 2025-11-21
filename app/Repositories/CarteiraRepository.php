@@ -6,40 +6,44 @@ use App\Models\Carteira;
 
 class CarteiraRepository
 {
+    protected $model;
+
+    public function __construct(Carteira $model)
+    {
+        $this->model = $model;
+    }
+
     public function all()
     {
-        return Carteira::all();
+        return $this->model->with(['user', 'transacoes'])->get();
     }
 
-    public function find(int $id): ?Carteira
+    public function find($id)
     {
-        return Carteira::find($id);
+        return $this->model->with(['user', 'transacoes'])->find($id);
     }
 
-    public function findByUser(int $id_user): ?Carteira
+    public function create(array $data)
     {
-        return Carteira::where('id_user', $id_user)->first();
+        return $this->model->create($data);
     }
 
-    public function create(array $data): Carteira
+    public function update($id, array $data)
     {
-        return Carteira::create($data);
+        $carteira = $this->model->find($id);
+        if ($carteira) {
+            $carteira->update($data);
+            return $carteira;
+        }
+        return null;
     }
 
-    public function update(int $id, array $data): ?Carteira
+    public function delete($id)
     {
-        $carteira = Carteira::find($id);
-        if (!$carteira) return null;
-
-        $carteira->update($data);
-        return $carteira;
-    }
-
-    public function delete(int $id): bool
-    {
-        $carteira = Carteira::find($id);
-        if (!$carteira) return false;
-
-        return $carteira->delete();
+        $carteira = $this->model->find($id);
+        if ($carteira) {
+            return $carteira->delete();
+        }
+        return false;
     }
 }

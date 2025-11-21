@@ -6,35 +6,44 @@ use App\Models\Escola;
 
 class EscolaRepository
 {
+    protected $model;
+
+    public function __construct(Escola $model)
+    {
+        $this->model = $model;
+    }
+
     public function all()
     {
-        return Escola::all();
+        return $this->model->with(['endereco', 'plano', 'cantinas', 'alunos'])->get();
     }
 
-    public function find(int $id): ?Escola
+    public function find($id)
     {
-        return Escola::find($id);
+        return $this->model->with(['endereco', 'plano', 'cantinas', 'alunos'])->find($id);
     }
 
-    public function create(array $data): Escola
+    public function create(array $data)
     {
-        return Escola::create($data);
+        return $this->model->create($data);
     }
 
-    public function update(int $id, array $data): ?Escola
+    public function update($id, array $data)
     {
-        $escola = Escola::find($id);
-        if (!$escola) return null;
-
-        $escola->update($data);
-        return $escola;
+        $escola = $this->model->find($id);
+        if ($escola) {
+            $escola->update($data);
+            return $escola;
+        }
+        return null;
     }
 
-    public function delete(int $id): bool
+    public function delete($id)
     {
-        $escola = Escola::find($id);
-        if (!$escola) return false;
-
-        return $escola->delete();
+        $escola = $this->model->find($id);
+        if ($escola) {
+            return $escola->delete();
+        }
+        return false;
     }
 }
