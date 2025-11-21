@@ -11,3 +11,6 @@ Route::get('/test-db', function() {
     }
 });
 
+Route::get('/teste', function () {
+    return \App\Models\User::all();
+});

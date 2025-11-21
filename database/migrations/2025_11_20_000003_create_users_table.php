@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Tabela de usuários
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('nome', 100);
@@ -21,7 +22,7 @@ return new class extends Migration
             $table->timestamps();
             $table->timestamp('deleted_at')->nullable();
 
-            // Foreign key
+            // Chave estrangeira para escola
             $table->foreign('id_escola')
                   ->references('id_escola')
                   ->on('tb_escola')
@@ -29,21 +30,14 @@ return new class extends Migration
                   ->onUpdate('cascade');
         });
 
-        // Se quiser, pode criar aqui também password resets e sessions
+        // Tabela de tokens de reset de senha
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
         });
 
-        Schema::create('sessions', function (Blueprint $table) {
-            $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
-            $table->string('ip_address', 45)->nullable();
-            $table->text('user_agent')->nullable();
-            $table->longText('payload');
-            $table->integer('last_activity')->index();
-        });
+        // **Removida criação duplicada de sessions**
     }
 
     /**
@@ -51,8 +45,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('sessions');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('users');
+        // sessions não é mais dropada aqui, Laravel cuida dela
     }
 };
