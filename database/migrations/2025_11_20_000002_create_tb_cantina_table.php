@@ -6,28 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-Schema::create('tb_cantina', function (Blueprint $table) {
-    $table->id('id_cantina'); // chave primária
-    $table->string('nome', 150); // nome da cantina
-    $table->foreignId('id_escola') // FK para escola
-          ->constrained('tb_escola', 'id_escola')
-          ->cascadeOnDelete();
-    $table->time('hr_abertura')->nullable(); // horário de abertura
-    $table->time('hr_fechamento')->nullable(); // horário de fechamento
-    $table->timestamps();
-});
+        Schema::create('tb_cantina', function (Blueprint $table) {
+            $table->bigIncrements('id_cantina');
+            $table->string('nome', 150);
+            $table->unsignedBigInteger('id_escola');
+            $table->time('hr_abertura')->nullable();
+            $table->time('hr_fechamento')->nullable();
+            $table->timestamps();
 
-
+            $table->foreign('id_escola')
+                ->references('id_escola')
+                ->on('tb_escola')
+                ->onDelete('cascade');
+        });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('tb_cantina');

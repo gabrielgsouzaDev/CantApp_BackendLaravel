@@ -6,38 +6,29 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('tb_controle_parental_produto', function (Blueprint $table) {
-            $table->id('id_controle_produto');
-
-            // FK para tb_controle_parental
+            $table->bigIncrements('id_controle_produto');
             $table->unsignedBigInteger('id_controle');
-            $table->foreign('id_controle')
-                  ->references('id_controle')
-                  ->on('tb_controle_parental')
-                  ->cascadeOnDelete();
-
-            // FK para produtos (nome da PK correto)
             $table->unsignedBigInteger('id_produto');
-            $table->foreign('id_produto')
-                  ->references('id_produto') // corrigido
-                  ->on('tb_produto')
-                  ->cascadeOnDelete();
-
-            $table->boolean('permitido')->default(true);
+            $table->boolean('permitido')->default(1);
             $table->timestamp('created_at')->useCurrent();
 
             $table->unique(['id_controle','id_produto']);
+
+            $table->foreign('id_controle')
+                ->references('id_controle')
+                ->on('tb_controle_parental')
+                ->onDelete('cascade');
+
+            $table->foreign('id_produto')
+                ->references('id_produto')
+                ->on('tb_produto')
+                ->onDelete('cascade');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('tb_controle_parental_produto');

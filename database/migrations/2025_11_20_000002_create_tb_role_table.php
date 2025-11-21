@@ -6,23 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('tb_role', function (Blueprint $table) {
-    $table->id('id_role');
-    $table->string('nome_role', 50)->unique();
-    $table->string('descricao')->nullable();
-    $table->timestamps();
-});
+            $table->bigIncrements('id_role');
+            $table->string('nome_role', 50);
+            $table->string('descricao', 255)->nullable();
+            $table->timestamps();
 
+            $table->unique('nome_role');
+        });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('tb_role');

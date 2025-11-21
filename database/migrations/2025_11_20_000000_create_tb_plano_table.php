@@ -6,25 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-Schema::create('tb_plano', function (Blueprint $table) {
-    $table->id('id_plano');
-    $table->string('nome', 50);
-    $table->decimal('preco_mensal', 12, 2)->default(0);
-    $table->unsignedInteger('qtd_max_alunos')->default(0);
-    $table->unsignedInteger('qtd_max_cantinas')->default(0);
-    $table->timestamps();
-});
-
+        Schema::create('tb_plano', function (Blueprint $table) {
+            $table->bigIncrements('id_plano');
+            $table->string('nome', 50);
+            $table->decimal('preco_mensal', 12, 2)->default(0);
+            $table->unsignedInteger('qtd_max_alunos')->default(0);
+            $table->unsignedInteger('qtd_max_cantinas')->default(0);
+            $table->timestamps();
+        });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('tb_plano');

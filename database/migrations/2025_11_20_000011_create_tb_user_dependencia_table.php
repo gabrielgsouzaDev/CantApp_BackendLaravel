@@ -6,23 +6,26 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('tb_user_dependencia', function (Blueprint $table) {
-    $table->foreignId('id_responsavel')->constrained('users')->cascadeOnDelete();
-    $table->foreignId('id_dependente')->constrained('users')->cascadeOnDelete();
-    $table->timestamp('created_at')->useCurrent();
-    $table->primary(['id_responsavel','id_dependente']);
-});
+            $table->unsignedBigInteger('id_responsavel');
+            $table->unsignedBigInteger('id_dependente');
+            $table->timestamp('created_at')->useCurrent();
+            $table->primary(['id_responsavel', 'id_dependente']);
 
+            $table->foreign('id_responsavel')
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
+
+            $table->foreign('id_dependente')
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
+        });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('tb_user_dependencia');

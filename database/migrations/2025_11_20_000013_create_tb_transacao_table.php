@@ -9,27 +9,31 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tb_transacao', function (Blueprint $table) {
-            $table->id('id_transacao');
-            $table->foreignId('id_carteira')
-                  ->nullable()
-                  ->constrained('tb_carteira', 'id_carteira')
-                  ->restrictOnDelete();
-            $table->foreignId('id_user_autor')
-                  ->nullable()
-                  ->constrained('users', 'id')
-                  ->nullOnDelete();
-            $table->foreignId('id_aprovador')
-                  ->nullable()
-                  ->constrained('users', 'id')
-                  ->nullOnDelete();
-            $table->uuid('uuid')->unique();
-            $table->enum('tipo',['PIX','Recarregar','PagamentoEscola','Debito','Repasse','Estorno']);
-            $table->decimal('valor',14,2);
-            $table->string('descricao',500)->nullable();
-            $table->string('referencia')->nullable();
-            $table->enum('status',['pendente','confirmada','rejeitada'])->default('pendente');
+            $table->bigIncrements('id_transacao');
+            $table->unsignedBigInteger('id_carteira')->nullable();
+            $table->unsignedBigInteger('id_user_autor')->nullable();
+            $table->unsignedBigInteger('id_aprovador')->nullable();
+            $table->char('uuid', 36);
+            $table->enum('tipo', ['PIX','Recarregar','PagamentoEscola','Debito','Repasse','Estorno']);
+            $table->decimal('valor', 14, 2);
+            $table->string('descricao', 500)->nullable();
+            $table->string('referencia', 255)->nullable();
+            $table->enum('status', ['pendente','confirmada','rejeitada'])->default('pendente');
             $table->timestamps();
+
+            $table->unique('uuid');
             $table->index(['id_carteira','status']);
+            $table->foreign('id_carteira')
+                ->references('id_carteira')
+                ->on('tb_carteira');
+            $table->foreign('id_user_autor')
+                ->references('id')
+                ->on('users')
+                ->onDelete('set null');
+            $table->foreign('id_aprovador')
+                ->references('id')
+                ->on('users')
+                ->onDelete('set null');
         });
     }
 
