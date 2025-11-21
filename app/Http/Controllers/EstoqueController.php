@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Services\EscolaService;
+use App\Services\EstoqueService;
 
-class EscolaController extends Controller
+class EstoqueController extends Controller
 {
     protected $service;
 
-    public function __construct(EscolaService $service)
+    public function __construct(EstoqueService $service)
     {
         $this->service = $service;
     }
@@ -27,12 +27,8 @@ class EscolaController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'nome' => 'required|string',
-            'cnpj' => 'nullable|string',
-            'id_endereco' => 'nullable|integer',
-            'id_plano' => 'nullable|integer',
-            'status' => 'required|string',
-            'qtd_alunos' => 'required|integer'
+            'id_produto' => 'required|integer',
+            'quantidade' => 'required|integer'
         ]);
 
         return response()->json($this->service->create($data));

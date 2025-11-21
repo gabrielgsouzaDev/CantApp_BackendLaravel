@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\CantinaService;
 use Illuminate\Http\Request;
+use App\Services\CantinaService;
 
 class CantinaController extends Controller
 {
@@ -26,16 +26,24 @@ class CantinaController extends Controller
 
     public function store(Request $request)
     {
-        return response()->json($this->service->create($request->all()), 201);
+        $data = $request->validate([
+            'nome' => 'required|string',
+            'id_escola' => 'required|integer',
+            'hr_abertura' => 'nullable|date_format:H:i:s',
+            'hr_fechamento' => 'nullable|date_format:H:i:s'
+        ]);
+
+        return response()->json($this->service->create($data));
     }
 
     public function update(Request $request, $id)
     {
-        return response()->json($this->service->update($id, $request->all()));
+        $data = $request->all();
+        return response()->json($this->service->update($id, $data));
     }
 
     public function destroy($id)
     {
-        return response()->json($this->service->delete($id));
+        return response()->json(['deleted' => $this->service->delete($id)]);
     }
 }

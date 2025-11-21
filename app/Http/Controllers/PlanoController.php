@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Services\EscolaService;
+use App\Services\PlanoService;
 
-class EscolaController extends Controller
+class PlanoController extends Controller
 {
     protected $service;
 
-    public function __construct(EscolaService $service)
+    public function __construct(PlanoService $service)
     {
         $this->service = $service;
     }
@@ -28,11 +28,9 @@ class EscolaController extends Controller
     {
         $data = $request->validate([
             'nome' => 'required|string',
-            'cnpj' => 'nullable|string',
-            'id_endereco' => 'nullable|integer',
-            'id_plano' => 'nullable|integer',
-            'status' => 'required|string',
-            'qtd_alunos' => 'required|integer'
+            'preco_mensal' => 'required|numeric',
+            'qtd_max_alunos' => 'required|integer',
+            'qtd_max_cantinas' => 'required|integer'
         ]);
 
         return response()->json($this->service->create($data));

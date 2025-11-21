@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\UserService;
 use Illuminate\Http\Request;
+use App\Services\UserService;
 
 class UserController extends Controller
 {
@@ -21,42 +21,33 @@ class UserController extends Controller
 
     public function show($id)
     {
-        $user = $this->service->find($id);
-
-        if (!$user) {
-            return response()->json(['error' => 'Usuário não encontrado'], 404);
-        }
-
-        return response()->json($user);
+        return response()->json($this->service->find($id));
     }
 
     public function store(Request $request)
     {
-        $data = $request->all();
-        $user = $this->service->create($data);
+        $data = $request->validate([
+            'nome' => 'required|string',
+            'email' => 'required|email|unique:users,email',
+            'telefone' => 'nullable|string',
+            'data_nascimento' => 'nullable|date',
+            'senha_hash' => 'required|string',
+            'id_escola' => 'nullable|integer',
+            'id_cantina' => 'nullable|integer',
+            'ativo' => 'boolean'
+        ]);
 
-        return response()->json($user, 201);
+        return response()->json($this->service->create($data));
     }
 
     public function update(Request $request, $id)
     {
-        $updated = $this->service->update($id, $request->all());
-
-        if (!$updated) {
-            return response()->json(['error' => 'Usuário não encontrado'], 404);
-        }
-
-        return response()->json(['message' => 'Atualizado com sucesso']);
+        $data = $request->all();
+        return response()->json($this->service->update($id, $data));
     }
 
     public function destroy($id)
     {
-        $deleted = $this->service->delete($id);
-
-        if (!$deleted) {
-            return response()->json(['error' => 'Usuário não encontrado'], 404);
-        }
-
-        return response()->json(['message' => 'Removido']);
+        return response()->json(['deleted' => $this->service->delete($id)]);
     }
 }

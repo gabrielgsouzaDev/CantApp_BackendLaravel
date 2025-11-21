@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\ItemPedidoService;
 use Illuminate\Http\Request;
+use App\Services\ItemPedidoService;
 
 class ItemPedidoController extends Controller
 {
@@ -26,16 +26,24 @@ class ItemPedidoController extends Controller
 
     public function store(Request $request)
     {
-        return response()->json($this->service->create($request->all()), 201);
+        $data = $request->validate([
+            'id_pedido' => 'required|integer',
+            'id_produto' => 'required|integer',
+            'quantidade' => 'required|integer',
+            'preco_unitario' => 'required|numeric'
+        ]);
+
+        return response()->json($this->service->create($data));
     }
 
     public function update(Request $request, $id)
     {
-        return response()->json($this->service->update($id, $request->all()));
+        $data = $request->all();
+        return response()->json($this->service->update($id, $data));
     }
 
     public function destroy($id)
     {
-        return response()->json($this->service->delete($id));
+        return response()->json(['deleted' => $this->service->delete($id)]);
     }
 }

@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Services\ProdutoService;
+use App\Services\FailedJobService;
 
-class ProdutoController extends Controller
+class FailedJobController extends Controller
 {
     protected $service;
 
-    public function __construct(ProdutoService $service)
+    public function __construct(FailedJobService $service)
     {
         $this->service = $service;
     }
@@ -26,20 +26,8 @@ class ProdutoController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'id_cantina' => 'required|integer',
-            'nome' => 'required|string',
-            'preco' => 'required|numeric',
-            'ativo' => 'boolean'
-        ]);
-
-        return response()->json($this->service->create($data));
-    }
-
-    public function update(Request $request, $id)
-    {
         $data = $request->all();
-        return response()->json($this->service->update($id, $data));
+        return response()->json($this->service->create($data));
     }
 
     public function destroy($id)

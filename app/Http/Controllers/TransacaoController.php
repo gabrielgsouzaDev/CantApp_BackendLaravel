@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\TransacaoService;
 use Illuminate\Http\Request;
+use App\Services\TransacaoService;
 
 class TransacaoController extends Controller
 {
@@ -26,6 +26,29 @@ class TransacaoController extends Controller
 
     public function store(Request $request)
     {
-        return response()->json($this->service->create($request->all()), 201);
+        $data = $request->validate([
+            'id_carteira' => 'required|integer',
+            'id_user_autor' => 'required|integer',
+            'id_aprovador' => 'nullable|integer',
+            'uuid' => 'required|string',
+            'tipo' => 'required|string',
+            'valor' => 'required|numeric',
+            'descricao' => 'nullable|string',
+            'referencia' => 'nullable|string',
+            'status' => 'required|string'
+        ]);
+
+        return response()->json($this->service->create($data));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $data = $request->all();
+        return response()->json($this->service->update($id, $data));
+    }
+
+    public function destroy($id)
+    {
+        return response()->json(['deleted' => $this->service->delete($id)]);
     }
 }

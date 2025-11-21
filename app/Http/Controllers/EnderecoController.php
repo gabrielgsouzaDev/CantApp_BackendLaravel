@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Services\EscolaService;
+use App\Services\EnderecoService;
 
-class EscolaController extends Controller
+class EnderecoController extends Controller
 {
     protected $service;
 
-    public function __construct(EscolaService $service)
+    public function __construct(EnderecoService $service)
     {
         $this->service = $service;
     }
@@ -27,12 +27,13 @@ class EscolaController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'nome' => 'required|string',
-            'cnpj' => 'nullable|string',
-            'id_endereco' => 'nullable|integer',
-            'id_plano' => 'nullable|integer',
-            'status' => 'required|string',
-            'qtd_alunos' => 'required|integer'
+            'cep' => 'required|string',
+            'logradouro' => 'required|string',
+            'numero' => 'nullable|string',
+            'complemento' => 'nullable|string',
+            'bairro' => 'nullable|string',
+            'cidade' => 'required|string',
+            'estado' => 'required|string'
         ]);
 
         return response()->json($this->service->create($data));
