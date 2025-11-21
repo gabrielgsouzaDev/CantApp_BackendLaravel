@@ -47,3 +47,12 @@ Route::delete('/produtos/{id}', [ProdutoController::class, 'destroy']);
 Route::get('/pedidos',          [PedidoController::class, 'index']);
 Route::post('/pedidos',         [PedidoController::class, 'store']);
 Route::put('/pedidos/{id}/status', [PedidoController::class, 'updateStatus']);
+
+// -------- ESCOLAS --------
+Route::get('/escolas', [EscolaController::class, 'index']);
+Route::get('/escolas/{id}', [EscolaController::class, 'show']);
+
+// -------- CANTINAS --------
+Route::get('/cantinas', [CantinaController::class, 'index']);
+Route::get('/cantinas/escola/{id_escola}', [CantinaController::class, 'listarPorEscola']);
+Route::get('/cantinas/{id}', [CantinaController::class, 'show']);
