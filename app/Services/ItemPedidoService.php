@@ -18,7 +18,7 @@ class ItemPedidoService
         return $this->repository->all();
     }
 
-    public function find(int $id)
+    public function find($id)
     {
         return $this->repository->find($id);
     }
@@ -28,12 +28,12 @@ class ItemPedidoService
         return $this->repository->create($data);
     }
 
-    public function update(int $id, array $data)
+    public function update($id, array $data)
     {
         return $this->repository->update($id, $data);
     }
 
-    public function delete(int $id)
+    public function delete($id)
     {
         return $this->repository->delete($id);
     }

@@ -2,13 +2,13 @@
 
 namespace App\Services;
 
-use App\Repositories\CantinaRepository;
+use App\Repositories\JobRepository;
 
-class CantinaService
+class JobService
 {
     protected $repository;
 
-    public function __construct(CantinaRepository $repository)
+    public function __construct(JobRepository $repository)
     {
         $this->repository = $repository;
     }

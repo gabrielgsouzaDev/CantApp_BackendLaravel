@@ -2,13 +2,13 @@
 
 namespace App\Services;
 
-use App\Repositories\CantinaRepository;
+use App\Repositories\JobBatchRepository;
 
-class CantinaService
+class JobBatchService
 {
     protected $repository;
 
-    public function __construct(CantinaRepository $repository)
+    public function __construct(JobBatchRepository $repository)
     {
         $this->repository = $repository;
     }

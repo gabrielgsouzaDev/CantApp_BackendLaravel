@@ -2,13 +2,13 @@
 
 namespace App\Services;
 
-use App\Repositories\CantinaRepository;
+use App\Repositories\FailedJobRepository;
 
-class CantinaService
+class FailedJobService
 {
     protected $repository;
 
-    public function __construct(CantinaRepository $repository)
+    public function __construct(FailedJobRepository $repository)
     {
         $this->repository = $repository;
     }
@@ -26,11 +26,6 @@ class CantinaService
     public function create(array $data)
     {
         return $this->repository->create($data);
-    }
-
-    public function update($id, array $data)
-    {
-        return $this->repository->update($id, $data);
     }
 
     public function delete($id)

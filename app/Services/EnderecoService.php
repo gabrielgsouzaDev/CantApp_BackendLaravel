@@ -2,13 +2,13 @@
 
 namespace App\Services;
 
-use App\Repositories\CantinaRepository;
+use App\Repositories\EnderecoRepository;
 
-class CantinaService
+class EnderecoService
 {
     protected $repository;
 
-    public function __construct(CantinaRepository $repository)
+    public function __construct(EnderecoRepository $repository)
     {
         $this->repository = $repository;
     }
