@@ -2,52 +2,47 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class ControleParental extends Model
 {
+    use HasFactory;
+
     protected $table = 'tb_controle_parental';
     protected $primaryKey = 'id_controle';
+    public $timestamps = true;
 
     protected $fillable = [
         'id_responsavel',
         'id_aluno',
         'ativo',
         'limite_diario',
-        'dias_semana',
+        'dias_semana'
     ];
 
     protected $casts = [
-        'id_responsavel' => 'integer',
-        'id_aluno' => 'integer',
         'ativo' => 'boolean',
-        'limite_diario' => 'decimal:2',
-        'dias_semana' => 'string',
+        'limite_diario' => 'decimal:2'
     ];
 
-    public $timestamps = true;
-
-    // Relacionamentos
-    public function responsavel(): BelongsTo
+    public function responsavel()
     {
         return $this->belongsTo(User::class, 'id_responsavel', 'id');
     }
 
-    public function aluno(): BelongsTo
+    public function aluno()
     {
         return $this->belongsTo(User::class, 'id_aluno', 'id');
     }
 
-    public function produtos(): BelongsToMany
+    public function produtos()
     {
         return $this->belongsToMany(
             Produto::class,
             'tb_controle_parental_produto',
             'id_controle',
             'id_produto'
-        )->withPivot('permitido')
-         ->withTimestamps();
+        )->withPivot('permitido')->withTimestamps();
     }
 }

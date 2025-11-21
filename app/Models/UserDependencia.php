@@ -2,12 +2,30 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
-class UserDependencia extends Pivot
+class UserDependencia extends Model
 {
+    use HasFactory;
+
     protected $table = 'tb_user_dependencia';
-    protected $primaryKey = null; // tabela pivot não precisa de PK
+    public $timestamps = true;
     public $incrementing = false;
-    public $timestamps = false;
+
+    protected $primaryKey = ['id_responsavel','id_dependente'];
+    protected $fillable = [
+        'id_responsavel',
+        'id_dependente'
+    ];
+
+    public function responsavel()
+    {
+        return $this->belongsTo(User::class, 'id_responsavel', 'id');
+    }
+
+    public function dependente()
+    {
+        return $this->belongsTo(User::class, 'id_dependente', 'id');
+    }
 }

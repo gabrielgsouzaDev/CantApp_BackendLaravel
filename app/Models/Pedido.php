@@ -2,22 +2,29 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Pedido extends Model
 {
+    use HasFactory;
+
     protected $table = 'tb_pedido';
     protected $primaryKey = 'id_pedido';
+    public $timestamps = true;
 
     protected $fillable = [
         'id_cantina',
         'id_comprador',
         'id_destinatario',
         'valor_total',
-        'status',
+        'status'
     ];
 
-    public $timestamps = true;
+    public function cantina()
+    {
+        return $this->belongsTo(Cantina::class, 'id_cantina', 'id_cantina');
+    }
 
     public function comprador()
     {
@@ -29,19 +36,8 @@ class Pedido extends Model
         return $this->belongsTo(User::class, 'id_destinatario', 'id');
     }
 
-    public function cantina()
+    public function itens()
     {
-        return $this->belongsTo(Cantina::class, 'id_cantina', 'id_cantina');
-    }
-
-    public function produtos()
-    {
-        return $this->belongsToMany(
-            Produto::class,
-            'tb_item_pedido',
-            'id_pedido',
-            'id_produto'
-        )->withPivot('quantidade', 'preco_unitario')
-         ->withTimestamps();
+        return $this->hasMany(ItemPedido::class, 'id_pedido', 'id_pedido');
     }
 }

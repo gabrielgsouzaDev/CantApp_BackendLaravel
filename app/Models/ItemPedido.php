@@ -2,37 +2,34 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ItemPedido extends Model
 {
+    use HasFactory;
+
     protected $table = 'tb_item_pedido';
     protected $primaryKey = 'id_item';
+    public $timestamps = true;
 
     protected $fillable = [
         'id_pedido',
         'id_produto',
         'quantidade',
-        'preco_unitario',
+        'preco_unitario'
     ];
 
     protected $casts = [
-        'id_pedido' => 'integer',
-        'id_produto' => 'integer',
-        'quantidade' => 'integer',
-        'preco_unitario' => 'decimal:2',
+        'preco_unitario' => 'decimal:2'
     ];
 
-    public $timestamps = false;
-
-    // Relacionamentos
-    public function pedido(): BelongsTo
+    public function pedido()
     {
         return $this->belongsTo(Pedido::class, 'id_pedido', 'id_pedido');
     }
 
-    public function produto(): BelongsTo
+    public function produto()
     {
         return $this->belongsTo(Produto::class, 'id_produto', 'id_produto');
     }

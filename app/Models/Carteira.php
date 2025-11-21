@@ -2,40 +2,38 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Carteira extends Model
 {
+    use HasFactory;
+
     protected $table = 'tb_carteira';
     protected $primaryKey = 'id_carteira';
+    public $timestamps = true;
 
     protected $fillable = [
         'id_user',
         'saldo',
         'saldo_bloqueado',
         'limite_recarregar',
-        'limite_maximo_saldo',
+        'limite_maximo_saldo'
     ];
 
     protected $casts = [
-        'id_user' => 'integer',
         'saldo' => 'decimal:2',
         'saldo_bloqueado' => 'decimal:2',
         'limite_recarregar' => 'decimal:2',
-        'limite_maximo_saldo' => 'decimal:2',
+        'limite_maximo_saldo' => 'decimal:2'
     ];
 
-    public $timestamps = true;
-
-    // Relacionamentos
-    public function user(): BelongsTo
+    public function user()
     {
         return $this->belongsTo(User::class, 'id_user', 'id');
     }
 
-    public function transacoes(): HasMany
+    public function transacoes()
     {
         return $this->hasMany(Transacao::class, 'id_carteira', 'id_carteira');
     }
