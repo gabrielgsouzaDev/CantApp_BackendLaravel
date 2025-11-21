@@ -10,7 +10,10 @@ class ResponseHelper
             'success' => true,
             'message' => $message,
             'data' => $data
-        ], $status);
+        ], $status)
+        ->header('Access-Control-Allow-Origin', '*')
+        ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+        ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
     }
 
     public static function error($message = 'Erro', $status = 400, $errors = null)
@@ -19,6 +22,9 @@ class ResponseHelper
             'success' => false,
             'message' => $message,
             'errors' => $errors
-        ], $status);
+        ], $status)
+        ->header('Access-Control-Allow-Origin', '*')
+        ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+        ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
     }
 }
