@@ -24,10 +24,18 @@ use App\Http\Controllers\EstoqueController;
 |--------------------------------------------------------------------------
 | Rotas Públicas (sem token)
 |--------------------------------------------------------------------------
+|
+| Aqui ficam todas as rotas que podem ser acessadas sem autenticação.
+| Inclui login, cadastro de usuário (POST /users), e endpoints públicos
+| necessários para iniciar a aplicação, como escolas e planos.
+|
 */
-Route::post('login', [AuthController::class, 'login'])->name('login');
 
-// Rotas públicas adicionais necessárias para login/cadastro
+// Autenticação e cadastro
+Route::post('login', [AuthController::class, 'login'])->name('login');
+Route::post('users', [UserController::class, 'store'])->name('register'); // cadastro público, endpoint = /api/users
+
+// Endpoints públicos de suporte
 Route::get('escolas', [EscolaController::class, 'index']);
 Route::get('planos', [PlanoController::class, 'index']);
 
@@ -35,7 +43,13 @@ Route::get('planos', [PlanoController::class, 'index']);
 |--------------------------------------------------------------------------
 | Rotas Protegidas por Token (auth:sanctum)
 |--------------------------------------------------------------------------
+|
+| Todas as demais rotas requerem autenticação via token. Isso inclui logout,
+| CRUD de usuários (exceto store), roles, produtos, pedidos, carteiras,
+| controle parental, estoque, etc.
+|
 */
+
 Route::middleware('auth:sanctum')->group(function () {
 
     // Auth
@@ -48,8 +62,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('user-role', [UserRoleController::class, 'store']);
     Route::delete('user-role', [UserRoleController::class, 'destroy']);
 
-    // Usuários
-    Route::apiResource('users', UserController::class);
+    // Usuários (todas as ações exceto store)
+    Route::get('users', [UserController::class, 'index']);
+    Route::get('users/{user}', [UserController::class, 'show']);
+    Route::put('users/{user}', [UserController::class, 'update']);
+    Route::delete('users/{user}', [UserController::class, 'destroy']);
 
     // Grupo 2 - Escola / Cantina / Infra
     Route::apiResource('cantinas', CantinaController::class);
