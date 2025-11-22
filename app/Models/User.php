@@ -36,15 +36,16 @@ class User extends Authenticatable
     ];
 
     // Relação com roles (muitos-para-muitos)
-    public function roles()
-    {
-        return $this->belongsToMany(
-            Role::class,
-            'tb_user_role',
-            'id_user',
-            'id_role'
-        )->withPivot('assigned_at')->withTimestamps();
-    }
+public function roles()
+{
+    return $this->belongsToMany(
+        Role::class,
+        'tb_user_role',
+        'id_user',
+        'id_role'
+    )->withTimestamps(); // removeu 'assigned_at'
+}
+
 
     // Relação com escola e cantina
     public function escola()
