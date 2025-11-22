@@ -14,16 +14,26 @@ class ProdutoController extends Controller
         $this->service = $service;
     }
 
+    // Listar todos os produtos
     public function index()
     {
-        return response()->json($this->service->all());
+        $produtos = $this->service->all();
+        return response()->json(['data' => $produtos]);
     }
 
+    // Mostrar um produto específico
     public function show($id)
     {
-        return response()->json($this->service->find($id));
+        $produto = $this->service->find($id);
+
+        if (!$produto) {
+            return response()->json(['error' => 'Produto não encontrado'], 404);
+        }
+
+        return response()->json(['data' => $produto]);
     }
 
+    // Criar produto
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -33,17 +43,33 @@ class ProdutoController extends Controller
             'ativo' => 'boolean'
         ]);
 
-        return response()->json($this->service->create($data));
+        $produto = $this->service->create($data);
+
+        return response()->json(['data' => $produto], 201);
     }
 
+    // Atualizar produto
     public function update(Request $request, $id)
     {
         $data = $request->all();
-        return response()->json($this->service->update($id, $data));
+        $produto = $this->service->update($id, $data);
+
+        if (!$produto) {
+            return response()->json(['error' => 'Produto não encontrado'], 404);
+        }
+
+        return response()->json(['data' => $produto]);
     }
 
+    // Deletar produto
     public function destroy($id)
     {
-        return response()->json(['deleted' => $this->service->delete($id)]);
+        $deleted = $this->service->delete($id);
+
+        if (!$deleted) {
+            return response()->json(['error' => 'Produto não encontrado'], 404);
+        }
+
+        return response()->json(['data' => ['deleted' => true]]);
     }
 }

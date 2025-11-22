@@ -14,16 +14,26 @@ class CantinaController extends Controller
         $this->service = $service;
     }
 
+    // Listar todas as cantinas
     public function index()
     {
-        return response()->json($this->service->all());
+        $cantinas = $this->service->all();
+        return response()->json(['data' => $cantinas]);
     }
 
+    // Mostrar uma cantina específica
     public function show($id)
     {
-        return response()->json($this->service->find($id));
+        $cantina = $this->service->find($id);
+
+        if (!$cantina) {
+            return response()->json(['error' => 'Cantina não encontrada'], 404);
+        }
+
+        return response()->json(['data' => $cantina]);
     }
 
+    // Criar cantina
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -33,17 +43,33 @@ class CantinaController extends Controller
             'hr_fechamento' => 'nullable|date_format:H:i:s'
         ]);
 
-        return response()->json($this->service->create($data));
+        $cantina = $this->service->create($data);
+
+        return response()->json(['data' => $cantina], 201);
     }
 
+    // Atualizar cantina
     public function update(Request $request, $id)
     {
         $data = $request->all();
-        return response()->json($this->service->update($id, $data));
+        $cantina = $this->service->update($id, $data);
+
+        if (!$cantina) {
+            return response()->json(['error' => 'Cantina não encontrada'], 404);
+        }
+
+        return response()->json(['data' => $cantina]);
     }
 
+    // Deletar cantina
     public function destroy($id)
     {
-        return response()->json(['deleted' => $this->service->delete($id)]);
+        $deleted = $this->service->delete($id);
+
+        if (!$deleted) {
+            return response()->json(['error' => 'Cantina não encontrada'], 404);
+        }
+
+        return response()->json(['data' => ['deleted' => true]]);
     }
 }
