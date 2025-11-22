@@ -38,7 +38,7 @@ Route::post('users', [UserController::class, 'store'])->name('register'); // cad
 // Endpoints públicos de suporte
 Route::get('escolas', [EscolaController::class, 'index']);
 Route::get('planos', [PlanoController::class, 'index']);
-
+Route::apiResource('enderecos', EnderecoController::class);
 /*
 |--------------------------------------------------------------------------
 | Rotas Protegidas por Token (auth:sanctum)
@@ -70,7 +70,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Grupo 2 - Escola / Cantina / Infra
     Route::apiResource('cantinas', CantinaController::class);
-    Route::apiResource('enderecos', EnderecoController::class);
     Route::apiResource('produtos', ProdutoController::class);
 
     // Pedidos e Itens
