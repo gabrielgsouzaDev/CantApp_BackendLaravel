@@ -36,16 +36,15 @@ class User extends Authenticatable
     ];
 
     // Relação com roles (muitos-para-muitos)
-public function roles()
-{
-    return $this->belongsToMany(
-        Role::class,
-        'tb_user_role',
-        'id_user',
-        'id_role'
-    )->withTimestamps(); // removeu 'assigned_at'
-}
-
+    public function roles()
+    {
+        return $this->belongsToMany(
+            Role::class,
+            'tb_user_role',
+            'id_user',
+            'id_role'
+        )->withTimestamps(); // Sem 'assigned_at'
+    }
 
     // Relação com escola e cantina
     public function escola()
@@ -83,7 +82,7 @@ public function roles()
             'tb_user_dependencia',
             'id_responsavel',
             'id_dependente'
-        )->withTimestamps();
+        ); // Removed withTimestamps
     }
 
     public function responsaveis()
@@ -93,7 +92,7 @@ public function roles()
             'tb_user_dependencia',
             'id_dependente',
             'id_responsavel'
-        )->withTimestamps();
+        ); // Removed withTimestamps
     }
 
     // Controle parental
