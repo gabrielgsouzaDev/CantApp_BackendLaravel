@@ -27,6 +27,9 @@ use App\Http\Controllers\EstoqueController;
 */
 Route::post('login', [AuthController::class, 'login'])->name('login');
 
+// Rotas públicas adicionais necessárias para login/cadastro
+Route::get('escolas', [EscolaController::class, 'index']);
+Route::get('planos', [PlanoController::class, 'index']);
 
 /*
 |--------------------------------------------------------------------------
@@ -40,62 +43,32 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout-all', [AuthController::class, 'logoutAll']);
     Route::post('token/refresh', [AuthController::class, 'refresh']);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Roles e UserRoles
-    |--------------------------------------------------------------------------
-    */
+    // Roles e UserRoles
     Route::apiResource('roles', RoleController::class);
     Route::post('user-role', [UserRoleController::class, 'store']);
     Route::delete('user-role', [UserRoleController::class, 'destroy']);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Usuários
-    |--------------------------------------------------------------------------
-    */
+    // Usuários
     Route::apiResource('users', UserController::class);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Grupo 2 - Escola / Cantina / Infra
-    |--------------------------------------------------------------------------
-    */
-    Route::apiResource('escolas', EscolaController::class);
+    // Grupo 2 - Escola / Cantina / Infra
     Route::apiResource('cantinas', CantinaController::class);
-    Route::apiResource('planos', PlanoController::class);
     Route::apiResource('enderecos', EnderecoController::class);
     Route::apiResource('produtos', ProdutoController::class);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Pedidos e Itens
-    |--------------------------------------------------------------------------
-    */
+    // Pedidos e Itens
     Route::apiResource('pedidos', PedidoController::class);
     Route::apiResource('itens-pedido', ItemPedidoController::class);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Carteira e Transações
-    |--------------------------------------------------------------------------
-    */
+    // Carteira e Transações
     Route::apiResource('carteiras', CarteiraController::class);
     Route::apiResource('transacoes', TransacaoController::class);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Controle Parental
-    |--------------------------------------------------------------------------
-    */
+    // Controle Parental
     Route::apiResource('controle-parental', ControleParentalController::class);
     Route::apiResource('controle-parental-produto', ControleParentalProdutoController::class);
     Route::apiResource('user-dependencia', UserDependenciaController::class);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Estoques
-    |--------------------------------------------------------------------------
-    */
+    // Estoques
     Route::apiResource('estoques', EstoqueController::class);
 });
