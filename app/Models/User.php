@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     protected $table = 'users';
     protected $primaryKey = 'id';
@@ -43,7 +44,7 @@ class User extends Authenticatable
             'tb_user_role',
             'id_user',
             'id_role'
-        )->withTimestamps(); // Sem 'assigned_at'
+        )->withTimestamps(); // sem 'assigned_at'
     }
 
     // Relação com escola e cantina
@@ -82,7 +83,7 @@ class User extends Authenticatable
             'tb_user_dependencia',
             'id_responsavel',
             'id_dependente'
-        ); // Removed withTimestamps
+        ); // sem withTimestamps()
     }
 
     public function responsaveis()
@@ -92,7 +93,7 @@ class User extends Authenticatable
             'tb_user_dependencia',
             'id_dependente',
             'id_responsavel'
-        ); // Removed withTimestamps
+        ); // sem withTimestamps()
     }
 
     // Controle parental
