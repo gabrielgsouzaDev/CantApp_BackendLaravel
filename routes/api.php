@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserRoleController;
@@ -19,51 +20,82 @@ use App\Http\Controllers\ControleParentalProdutoController;
 use App\Http\Controllers\UserDependenciaController;
 use App\Http\Controllers\EstoqueController;
 
-// Auth
-Route::post('login', [AuthController::class, 'login']);
+/*
+|--------------------------------------------------------------------------
+| Rotas Públicas (sem token)
+|--------------------------------------------------------------------------
+*/
+Route::post('login', [AuthController::class, 'login'])->name('login');
+
+
+/*
+|--------------------------------------------------------------------------
+| Rotas Protegidas por Token (auth:sanctum)
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth:sanctum')->group(function () {
+
+    // Auth
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('logout-all', [AuthController::class, 'logoutAll']);
     Route::post('token/refresh', [AuthController::class, 'refresh']);
-});
 
-// Roles e UserRoles
-Route::middleware('auth:sanctum')->group(function () {
+    /*
+    |--------------------------------------------------------------------------
+    | Roles e UserRoles
+    |--------------------------------------------------------------------------
+    */
     Route::apiResource('roles', RoleController::class);
     Route::post('user-role', [UserRoleController::class, 'store']);
     Route::delete('user-role', [UserRoleController::class, 'destroy']);
-});
 
-// Usuários
-Route::middleware('auth:sanctum')->group(function () {
+    /*
+    |--------------------------------------------------------------------------
+    | Usuários
+    |--------------------------------------------------------------------------
+    */
     Route::apiResource('users', UserController::class);
-});
 
-// Grupo 2 - Escola / Cantina
-Route::middleware('auth:sanctum')->group(function () {
+    /*
+    |--------------------------------------------------------------------------
+    | Grupo 2 - Escola / Cantina / Infra
+    |--------------------------------------------------------------------------
+    */
     Route::apiResource('escolas', EscolaController::class);
     Route::apiResource('cantinas', CantinaController::class);
     Route::apiResource('planos', PlanoController::class);
     Route::apiResource('enderecos', EnderecoController::class);
     Route::apiResource('produtos', ProdutoController::class);
-});
 
-// Pedidos e Itens
-Route::middleware('auth:sanctum')->group(function () {
+    /*
+    |--------------------------------------------------------------------------
+    | Pedidos e Itens
+    |--------------------------------------------------------------------------
+    */
     Route::apiResource('pedidos', PedidoController::class);
     Route::apiResource('itens-pedido', ItemPedidoController::class);
-});
 
-// Carteira e transações
-Route::middleware('auth:sanctum')->group(function () {
+    /*
+    |--------------------------------------------------------------------------
+    | Carteira e Transações
+    |--------------------------------------------------------------------------
+    */
     Route::apiResource('carteiras', CarteiraController::class);
     Route::apiResource('transacoes', TransacaoController::class);
-});
 
-// Controle parental
-Route::middleware('auth:sanctum')->group(function () {
+    /*
+    |--------------------------------------------------------------------------
+    | Controle Parental
+    |--------------------------------------------------------------------------
+    */
     Route::apiResource('controle-parental', ControleParentalController::class);
     Route::apiResource('controle-parental-produto', ControleParentalProdutoController::class);
     Route::apiResource('user-dependencia', UserDependenciaController::class);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Estoques
+    |--------------------------------------------------------------------------
+    */
     Route::apiResource('estoques', EstoqueController::class);
 });
