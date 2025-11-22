@@ -16,12 +16,19 @@ class PlanoController extends Controller
 
     public function index()
     {
-        return response()->json($this->service->all());
+        $planos = $this->service->all();
+        return response()->json(['data' => $planos]);
     }
 
     public function show($id)
     {
-        return response()->json($this->service->find($id));
+        $plano = $this->service->find($id);
+
+        if (!$plano) {
+            return response()->json(['error' => 'Plano não encontrado'], 404);
+        }
+
+        return response()->json(['data' => $plano]);
     }
 
     public function store(Request $request)
@@ -33,17 +40,31 @@ class PlanoController extends Controller
             'qtd_max_cantinas' => 'required|integer'
         ]);
 
-        return response()->json($this->service->create($data));
+        $plano = $this->service->create($data);
+
+        return response()->json(['data' => $plano], 201);
     }
 
     public function update(Request $request, $id)
     {
         $data = $request->all();
-        return response()->json($this->service->update($id, $data));
+        $plano = $this->service->update($id, $data);
+
+        if (!$plano) {
+            return response()->json(['error' => 'Plano não encontrado'], 404);
+        }
+
+        return response()->json(['data' => $plano]);
     }
 
     public function destroy($id)
     {
-        return response()->json(['deleted' => $this->service->delete($id)]);
+        $deleted = $this->service->delete($id);
+
+        if (!$deleted) {
+            return response()->json(['error' => 'Plano não encontrado'], 404);
+        }
+
+        return response()->json(['data' => ['deleted' => true]]);
     }
 }

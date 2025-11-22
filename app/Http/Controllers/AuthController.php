@@ -41,15 +41,17 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'token' => $token,
-            'user' => [
-                'id' => $user->id,
-                'nome' => $user->nome,
-                'email' => $user->email,
-                'role' => $role,
-                'id_escola' => $user->id_escola,
-                'id_cantina' => $user->id_cantina,
-                'ativo' => $user->ativo
+            'data' => [
+                'token' => $token,
+                'user' => [
+                    'id' => $user->id,
+                    'nome' => $user->nome,
+                    'email' => $user->email,
+                    'role' => $role,
+                    'id_escola' => $user->id_escola,
+                    'id_cantina' => $user->id_cantina,
+                    'ativo' => $user->ativo
+                ]
             ]
         ]);
     }
@@ -59,7 +61,7 @@ class AuthController extends Controller
     {
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json(['success' => true]);
+        return response()->json(['data' => ['success' => true]]);
     }
 
     // Logout global (todos os tokens do usuário)
@@ -67,7 +69,7 @@ class AuthController extends Controller
     {
         $request->user()->tokens()->delete();
 
-        return response()->json(['success' => true]);
+        return response()->json(['data' => ['success' => true]]);
     }
 
     // Refresh de token do dispositivo
@@ -81,8 +83,9 @@ class AuthController extends Controller
         $token = $user->createToken($device_name)->plainTextToken;
 
         return response()->json([
-            'success' => true,
-            'token' => $token
+            'data' => [
+                'token' => $token
+            ]
         ]);
     }
 }

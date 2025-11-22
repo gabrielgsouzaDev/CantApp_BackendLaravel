@@ -16,12 +16,19 @@ class EstoqueController extends Controller
 
     public function index()
     {
-        return response()->json($this->service->all());
+        $itens = $this->service->all();
+        return response()->json(['data' => $itens]);
     }
 
     public function show($id)
     {
-        return response()->json($this->service->find($id));
+        $item = $this->service->find($id);
+
+        if (!$item) {
+            return response()->json(['error' => 'Item de estoque não encontrado'], 404);
+        }
+
+        return response()->json(['data' => $item]);
     }
 
     public function store(Request $request)
@@ -31,17 +38,31 @@ class EstoqueController extends Controller
             'quantidade' => 'required|integer'
         ]);
 
-        return response()->json($this->service->create($data));
+        $item = $this->service->create($data);
+
+        return response()->json(['data' => $item], 201);
     }
 
     public function update(Request $request, $id)
     {
         $data = $request->all();
-        return response()->json($this->service->update($id, $data));
+        $item = $this->service->update($id, $data);
+
+        if (!$item) {
+            return response()->json(['error' => 'Item de estoque não encontrado'], 404);
+        }
+
+        return response()->json(['data' => $item]);
     }
 
     public function destroy($id)
     {
-        return response()->json(['deleted' => $this->service->delete($id)]);
+        $deleted = $this->service->delete($id);
+
+        if (!$deleted) {
+            return response()->json(['error' => 'Item de estoque não encontrado'], 404);
+        }
+
+        return response()->json(['data' => ['deleted' => true]]);
     }
 }

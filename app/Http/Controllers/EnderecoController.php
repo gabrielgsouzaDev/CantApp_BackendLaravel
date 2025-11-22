@@ -16,12 +16,19 @@ class EnderecoController extends Controller
 
     public function index()
     {
-        return response()->json($this->service->all());
+        $enderecos = $this->service->all();
+        return response()->json(['data' => $enderecos]);
     }
 
     public function show($id)
     {
-        return response()->json($this->service->find($id));
+        $endereco = $this->service->find($id);
+
+        if (!$endereco) {
+            return response()->json(['error' => 'Endereço não encontrado'], 404);
+        }
+
+        return response()->json(['data' => $endereco]);
     }
 
     public function store(Request $request)
@@ -36,17 +43,31 @@ class EnderecoController extends Controller
             'estado' => 'required|string'
         ]);
 
-        return response()->json($this->service->create($data));
+        $endereco = $this->service->create($data);
+
+        return response()->json(['data' => $endereco], 201);
     }
 
     public function update(Request $request, $id)
     {
         $data = $request->all();
-        return response()->json($this->service->update($id, $data));
+        $endereco = $this->service->update($id, $data);
+
+        if (!$endereco) {
+            return response()->json(['error' => 'Endereço não encontrado'], 404);
+        }
+
+        return response()->json(['data' => $endereco]);
     }
 
     public function destroy($id)
     {
-        return response()->json(['deleted' => $this->service->delete($id)]);
+        $deleted = $this->service->delete($id);
+
+        if (!$deleted) {
+            return response()->json(['error' => 'Endereço não encontrado'], 404);
+        }
+
+        return response()->json(['data' => ['deleted' => true]]);
     }
 }

@@ -16,12 +16,19 @@ class EscolaController extends Controller
 
     public function index()
     {
-        return response()->json($this->service->all());
+        $escolas = $this->service->all();
+        return response()->json(['data' => $escolas]);
     }
 
     public function show($id)
     {
-        return response()->json($this->service->find($id));
+        $escola = $this->service->find($id);
+
+        if (!$escola) {
+            return response()->json(['error' => 'Escola não encontrada'], 404);
+        }
+
+        return response()->json(['data' => $escola]);
     }
 
     public function store(Request $request)
@@ -35,17 +42,31 @@ class EscolaController extends Controller
             'qtd_alunos' => 'required|integer'
         ]);
 
-        return response()->json($this->service->create($data));
+        $escola = $this->service->create($data);
+
+        return response()->json(['data' => $escola], 201);
     }
 
     public function update(Request $request, $id)
     {
         $data = $request->all();
-        return response()->json($this->service->update($id, $data));
+        $escola = $this->service->update($id, $data);
+
+        if (!$escola) {
+            return response()->json(['error' => 'Escola não encontrada'], 404);
+        }
+
+        return response()->json(['data' => $escola]);
     }
 
     public function destroy($id)
     {
-        return response()->json(['deleted' => $this->service->delete($id)]);
+        $deleted = $this->service->delete($id);
+
+        if (!$deleted) {
+            return response()->json(['error' => 'Escola não encontrada'], 404);
+        }
+
+        return response()->json(['data' => ['deleted' => true]]);
     }
 }
