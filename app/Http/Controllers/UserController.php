@@ -56,27 +56,35 @@ class UserController extends Controller
     /**
      * Criar novo usuário
      */
-    public function store(Request $request)
-    {
-        $data = $request->validate([
-            'nome' => 'required|string',
-            'email' => 'required|email|unique:users,email',
-            'telefone' => 'nullable|string',
-            'data_nascimento' => 'nullable|date',
-            'senha' => 'required|string|min:6',
-            'id_escola' => 'nullable|integer',
-            'id_cantina' => 'nullable|integer',
-            'ativo' => 'boolean'
-        ]);
+ public function store(Request $request)
+{
+    $data = $request->validate([
+        'nome' => 'required|string',
+        'email' => 'required|email|unique:users,email',
+        'telefone' => 'nullable|string',
+        'data_nascimento' => 'nullable|date',
+        'senha' => 'required|string|min:6',
+        'id_escola' => 'nullable|integer',
+        'id_cantina' => 'nullable|integer',
+        'ativo' => 'boolean',
+        'id_role' => 'required|integer|exists:tb_role,id_role' // ✅ agora obrigatório
+    ]);
 
-        // Criptografar senha
-        $data['senha_hash'] = \Hash::make($data['senha']);
-        unset($data['senha']);
+    // Hash da senha
+    $data['senha_hash'] = \Hash::make($data['senha']);
 
-        $user = $this->service->create($data);
+    $roleId = $data['id_role']; // guarda a role
+    unset($data['senha'], $data['id_role']);
 
-        return response()->json(['data' => $user], 201);
+    $user = $this->service->create($data);
+
+    // ✅ Associa a role ao usuário
+    if ($user) {
+        $user->roles()->attach($roleId);
     }
+
+    return response()->json(['data' => $user->load('roles')], 201);
+}
 
     /**
      * Atualizar usuário
