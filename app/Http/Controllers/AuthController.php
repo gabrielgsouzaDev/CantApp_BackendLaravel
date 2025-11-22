@@ -3,11 +3,18 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;
+use App\Services\UserService;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
+    protected $userService;
+
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
+
     // Login unificado
     public function login(Request $request)
     {
@@ -17,7 +24,7 @@ class AuthController extends Controller
             'device_name' => 'required|string' // para diferenciar tokens por dispositivo
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $user = $this->userService->all()->where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->senha, $user->senha_hash)) {
             return response()->json([

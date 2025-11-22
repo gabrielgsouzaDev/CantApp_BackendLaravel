@@ -25,20 +25,23 @@ class UserController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $data = $request->validate([
-            'nome' => 'required|string',
-            'email' => 'required|email|unique:users,email',
-            'telefone' => 'nullable|string',
-            'data_nascimento' => 'nullable|date',
-            'senha_hash' => 'required|string',
-            'id_escola' => 'nullable|integer',
-            'id_cantina' => 'nullable|integer',
-            'ativo' => 'boolean'
-        ]);
+{
+    $data = $request->validate([
+        'nome' => 'required|string',
+        'email' => 'required|email|unique:users,email',
+        'telefone' => 'nullable|string',
+        'data_nascimento' => 'nullable|date',
+        'senha' => 'required|string|min:6', // <- alterado
+        'id_escola' => 'nullable|integer',
+        'id_cantina' => 'nullable|integer',
+        'ativo' => 'boolean'
+    ]);
 
-        return response()->json($this->service->create($data));
-    }
+    $data['senha_hash'] = \Hash::make($data['senha']); // gerar hash
+    unset($data['senha']); // remover campo senha plano
+
+    return response()->json($this->service->create($data));
+}
 
     public function update(Request $request, $id)
     {
