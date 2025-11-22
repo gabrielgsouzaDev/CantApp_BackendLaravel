@@ -8,7 +8,6 @@ class Kernel extends HttpKernel
 {
     // 🌍 Middleware global — tudo que deve rodar em TODAS as requisições
     protected $middleware = [
-        \App\Http\Middleware\CorsMiddleware::class, // nosso CORS personalizado (se existir)
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
