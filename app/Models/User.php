@@ -28,13 +28,25 @@ class User extends Authenticatable
     ];
 
     protected $hidden = [
-        'senha_hash'
+        'senha_hash',
+        'remember_token',
     ];
 
     protected $casts = [
         'ativo' => 'boolean',
-        'data_nascimento' => 'date'
+        'data_nascimento' => 'date',
     ];
+
+    /**
+     * Get the password for authentication.
+     * Isso permite que o Laravel use senha_hash no Auth::attempt()
+     *
+     * @return string
+     */
+    public function getAuthPassword()
+    {
+        return $this->senha_hash;
+    }
 
     // Relação com roles (muitos-para-muitos)
     public function roles()
@@ -44,7 +56,7 @@ class User extends Authenticatable
             'tb_user_role',
             'id_user',
             'id_role'
-        )->withTimestamps(); // sem 'assigned_at'
+        ); // remover withTimestamps() se a tabela pivô não tiver created_at/updated_at
     }
 
     // Relação com escola e cantina
@@ -83,7 +95,7 @@ class User extends Authenticatable
             'tb_user_dependencia',
             'id_responsavel',
             'id_dependente'
-        ); // sem withTimestamps()
+        );
     }
 
     public function responsaveis()
@@ -93,7 +105,7 @@ class User extends Authenticatable
             'tb_user_dependencia',
             'id_dependente',
             'id_responsavel'
-        ); // sem withTimestamps()
+        );
     }
 
     // Controle parental
