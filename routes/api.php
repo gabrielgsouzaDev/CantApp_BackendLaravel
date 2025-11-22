@@ -24,30 +24,21 @@ use App\Http\Controllers\EstoqueController;
 |--------------------------------------------------------------------------
 | Rotas Públicas (sem token)
 |--------------------------------------------------------------------------
-|
-| Aqui ficam todas as rotas que podem ser acessadas sem autenticação.
-| Inclui login, cadastro de usuário (POST /users), e endpoints públicos
-| necessários para iniciar a aplicação, como escolas e planos.
-|
 */
 
-// Autenticação e cadastro
 Route::post('login', [AuthController::class, 'login'])->name('login');
-Route::post('users', [UserController::class, 'store'])->name('register'); // cadastro público, endpoint = /api/users
+Route::post('users', [UserController::class, 'store'])->name('register');
 
-// Endpoints públicos de suporte
-Route::get('escolas', [EscolaController::class, 'index']);
+// ✅ ALTERAÇÃO AQUI: escolas agora é CRUD completo (inclui POST)
+Route::apiResource('escolas', EscolaController::class);
+
 Route::get('planos', [PlanoController::class, 'index']);
 Route::apiResource('enderecos', EnderecoController::class);
+
 /*
 |--------------------------------------------------------------------------
 | Rotas Protegidas por Token (auth:sanctum)
 |--------------------------------------------------------------------------
-|
-| Todas as demais rotas requerem autenticação via token. Isso inclui logout,
-| CRUD de usuários (exceto store), roles, produtos, pedidos, carteiras,
-| controle parental, estoque, etc.
-|
 */
 
 Route::middleware('auth:sanctum')->group(function () {
