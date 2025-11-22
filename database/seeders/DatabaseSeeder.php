@@ -8,14 +8,6 @@ class DatabaseSeeder extends Seeder
 {
     public function run()
     {
-        // Grupo 1
-        $this->call([
-            \Database\Seeders\CacheSeeder::class,
-            \Database\Seeders\JobSeeder::class,
-            \Database\Seeders\FailedJobSeeder::class,
-            \Database\Seeders\JobBatchSeeder::class,
-            \Database\Seeders\MigrationSeeder::class,
-        ]);
 
         // Grupo 2
         $this->call([
@@ -29,6 +21,7 @@ class DatabaseSeeder extends Seeder
 
         // Grupo 3
         $this->call([
+            \Database\Seeders\CarteiraSeeder::class,
             \Database\Seeders\ControleParentalSeeder::class,
             \Database\Seeders\ControleParentalProdutoSeeder::class,
             \Database\Seeders\UserDependenciaSeeder::class,

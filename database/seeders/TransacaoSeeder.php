@@ -10,7 +10,7 @@ class TransacaoSeeder extends Seeder
     public function run()
     {
         Transacao::insert([
-            ['id_carteira' => 1, 'id_user_autor' => 2, 'id_aprovador' => null, 'uuid' => 'uuid-123', 'tipo' => 'credito', 'valor' => 50.00, 'descricao' => 'Recarga inicial', 'referencia' => 'recarga_001', 'status' => 'aprovado'],
+            ['id_carteira' => 1, 'id_user_autor' => 2, 'id_aprovador' => null, 'uuid' => 'uuid-123', 'tipo' => 'Recarregar', 'valor' => 50.00, 'descricao' => 'Recarga inicial', 'referencia' => 'recarga_001', 'status' => 'confirmada'],
         ]);
     }
 }

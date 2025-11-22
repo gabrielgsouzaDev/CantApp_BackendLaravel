@@ -12,7 +12,7 @@ class ControleParentalProdutoSeeder extends Seeder
         ControleParentalProduto::insert([
             ['id_controle' => 1, 'id_produto' => 1, 'permitido' => true],
             ['id_controle' => 1, 'id_produto' => 2, 'permitido' => false],
-            ['id_controle' => 2, 'id_produto' => 3, 'permitido' => true],
+            ['id_controle' => 1, 'id_produto' => 3, 'permitido' => true],
         ]);
     }
 }
