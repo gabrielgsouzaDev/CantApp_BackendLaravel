@@ -8,14 +8,14 @@ return [
     |--------------------------------------------------------------------------
     |
     | Configuração para permitir que seu frontend faça requisições para a API
-    | sem bloqueio do navegador (CORS). 
+    | sem bloqueio do navegador (CORS), usando domínios específicos e suportando cookies.
     |
     */
 
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
-    // Permite todos os métodos HTTP para simplificar o desenvolvimento
-    'allowed_methods' => ['*'], 
+    // Permite todos os métodos HTTP
+    'allowed_methods' => ['*'],
 
     // Origens permitidas: front local e produção
     'allowed_origins' => [
@@ -27,7 +27,7 @@ return [
 
     'allowed_origins_patterns' => [],
 
-    // Permite todos os headers para frontend
+    // Permite todos os headers do frontend
     'allowed_headers' => ['*'],
 
     'exposed_headers' => [],

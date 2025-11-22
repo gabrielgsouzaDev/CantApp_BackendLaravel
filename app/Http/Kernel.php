@@ -6,37 +6,31 @@ use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
 {
-    // 🌍 Middleware global — somente o essencial pra API
+    // 🌍 Middleware global — tudo que deve rodar em TODAS as requisições
     protected $middleware = [
-        \App\Http\Middleware\CorsMiddleware::class, 
-        \Illuminate\Http\Middleware\HandleCors::class,
+        \App\Http\Middleware\CorsMiddleware::class, // nosso CORS personalizado
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
     ];
 
-    // 👇 A parte mais importante:
+    // 🗂 Grupos de middleware
     protected $middlewareGroups = [
+        // ❌ Web não usado, deixamos vazio
+        'web' => [],
 
-        // ❌ WEB não será usado, mas deixamos vazio para não quebrar o core
-        'web' => [
-            // vazio — sem sessão, sem cookies, sem csrf, sem views
-        ],
-
-        // ✅ API limpo
+        // ✅ API-only
         'api' => [
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
     ];
 
+    // 📌 Middleware que podem ser aplicados por rota
     protected $routeMiddleware = [
         'auth' => \App\Http\Middleware\Authenticate::class,
-
-        // Sanctum — obrigatório para auth:sanctum
         'auth:sanctum' => \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-
-        // Caso precise em rotas futuras
         'bindings' => \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        'role' => \App\Http\Middleware\RoleMiddleware::class,
     ];
 }
