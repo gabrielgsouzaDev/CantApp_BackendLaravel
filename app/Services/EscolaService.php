@@ -32,4 +32,10 @@ class EscolaService
     {
         return $this->repo->delete($id);
     }
+    
+    public function buscar($id)
+    {
+        return $this->repo->find($id);
+    }
+
 }

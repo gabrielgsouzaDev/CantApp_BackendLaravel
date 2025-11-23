@@ -23,9 +23,11 @@ class EscolaController extends Controller
     public function store(Request $request)
     {
         $dados = $request->validate([
-            'nome' => 'required',
-            'endereco' => 'required'
-            // adicione outros campos da tabela tb_escola se houver
+            'nome' => 'required|string|max:150',
+            'id_endereco' => 'nullable|integer',
+            'id_plano' => 'nullable|integer',
+            'status' => 'nullable|string',
+            'qtd_alunos' => 'nullable|integer'
         ]);
 
         return ResponseHelper::success($this->service->criar($dados));
@@ -33,16 +35,36 @@ class EscolaController extends Controller
 
     public function show($id)
     {
-        return ResponseHelper::success($this->service->repo->find($id));
+        $escola = $this->service->buscar($id);
+
+        if (!$escola) {
+            return ResponseHelper::error('Escola não encontrada', 404);
+        }
+
+        return ResponseHelper::success($escola);
     }
 
     public function update(Request $request, $id)
     {
-        return ResponseHelper::success($this->service->atualizar($id, $request->all()));
+        $escola = $this->service->buscar($id);
+
+        if (!$escola) {
+            return ResponseHelper::error('Escola não encontrada', 404);
+        }
+
+        return ResponseHelper::success(
+            $this->service->atualizar($id, $request->all())
+        );
     }
 
     public function destroy($id)
     {
+        $escola = $this->service->buscar($id);
+
+        if (!$escola) {
+            return ResponseHelper::error('Escola não encontrada', 404);
+        }
+
         return ResponseHelper::success($this->service->deletar($id));
     }
 }

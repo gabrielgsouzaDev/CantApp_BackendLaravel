@@ -65,3 +65,10 @@ Route::get('/cantinas/{id}',                [CantinaController::class, 'show']);
 Route::post('/payment/card', [PagamentoController::class, 'payWithCard']);
 Route::post('/payment/pix', [PagamentoController::class, 'payWithPix']);
 Route::post('/webhook/stripe', [PagamentoController::class, 'webhook']);
+
+// ------- Status Escola --------
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/escolas/pendentes', [AdminController::class, 'listarPendentes']);
+    Route::post('/escolas/{id}/aprovar', [AdminController::class, 'aprovar']);
+    Route::post('/escolas/{id}/negar', [AdminController::class, 'negar']);
+});
