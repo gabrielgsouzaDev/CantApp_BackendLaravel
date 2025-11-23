@@ -10,6 +10,7 @@ use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\EscolaController;
 use App\Http\Controllers\CantinaController;
+use App\Http\Controllers\PagamentoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -59,3 +60,8 @@ Route::delete('/escolas/{id}',[EscolaController::class, 'destroy']);
 Route::get('/cantinas',                      [CantinaController::class, 'index']);
 Route::get('/cantinas/escola/{id_escola}',  [CantinaController::class, 'listarPorEscola']);
 Route::get('/cantinas/{id}',                [CantinaController::class, 'show']);
+
+// ------- Pagamento --------
+Route::post('/payment/card', [PagamentoController::class, 'payWithCard']);
+Route::post('/payment/pix', [PagamentoController::class, 'payWithPix']);
+Route::post('/webhook/stripe', [PagamentoController::class, 'webhook']);
