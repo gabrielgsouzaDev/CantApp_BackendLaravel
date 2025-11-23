@@ -56,7 +56,10 @@ class UserController extends Controller
     /**
      * Criar novo usuário
      */
- public function store(Request $request)
+/**
+ * Criar novo usuário
+ */
+public function store(Request $request)
 {
     $data = $request->validate([
         'nome' => 'required|string',
@@ -67,24 +70,32 @@ class UserController extends Controller
         'id_escola' => 'nullable|integer',
         'id_cantina' => 'nullable|integer',
         'ativo' => 'boolean',
-        'id_role' => 'required|integer|exists:tb_role,id_role' // ✅ agora obrigatório
+        // Valida que a 'role' é uma string existente na tabela de roles
+        'role' => 'required|string|exists:tb_role,nome_role' 
     ]);
 
     // Hash da senha
     $data['senha_hash'] = \Hash::make($data['senha']);
 
-    $roleId = $data['id_role']; // guarda a role
-    unset($data['senha'], $data['id_role']);
+    $roleName = $data['role']; // guarda o nome da role
+    unset($data['senha'], $data['role']); // remove campos temporários
 
     $user = $this->service->create($data);
 
-    // ✅ Associa a role ao usuário
+    // Associa a role ao usuário buscando pelo nome
     if ($user) {
-        $user->roles()->attach($roleId);
+        $role = \App\Models\Role::where('nome_role', $roleName)->first();
+        if ($role) {
+            $user->roles()->attach($role->id_role);
+        }
     }
 
-    return response()->json(['data' => $user->load('roles')], 201);
+    // Carrega o usuário com a role associada
+    $user->load('roles');
+
+    return response()->json(['data' => $user], 201);
 }
+
 
     /**
      * Atualizar usuário
