@@ -19,6 +19,7 @@ use App\Http\Controllers\ControleParentalController;
 use App\Http\Controllers\ControleParentalProdutoController;
 use App\Http\Controllers\UserDependenciaController;
 use App\Http\Controllers\EstoqueController;
+use App\Http\Controllers\ProdutoFavoritoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -69,6 +70,12 @@ Route::middleware('auth:sanctum')->group(function () {
     /* ================= PRODUTOS ================= */
     Route::get('cantinas/{id_cantina}/produtos', [ProdutoController::class, 'getByCanteen']);
     Route::apiResource('produtos', ProdutoController::class);
+
+    /* ================= FAVORITOS ================= */
+    // ✔ Seguro, simples e REST
+    Route::get('favoritos/{id_user}', [ProdutoFavoritoController::class, 'index']);
+    Route::post('favoritos', [ProdutoFavoritoController::class, 'store']);
+    Route::delete('favoritos/{id_user}/{id_produto}', [ProdutoFavoritoController::class, 'destroy']);
 
     /* ================= ESTOQUE ================= */
     Route::apiResource('estoques', EstoqueController::class);

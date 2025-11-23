@@ -13,13 +13,14 @@ class Produto extends Model
     protected $primaryKey = 'id_produto';
     public $timestamps = true;
 
-    protected $fillable = [
-        'id_cantina',
-        'nome',
-        'preco',
-        'ativo', 
-        'categoria'
-    ];
+protected $fillable = [
+    'id_cantina',
+    'nome',
+    'preco',
+    'ativo',
+    'categoria',
+    'url_imagem'
+];
 
     protected $casts = [
         'ativo' => 'boolean',
