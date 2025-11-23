@@ -22,60 +22,83 @@ use App\Http\Controllers\EstoqueController;
 
 /*
 |--------------------------------------------------------------------------
-| Rotas Públicas (sem token)
+| ROTAS PÚBLICAS (SEM TOKEN)
 |--------------------------------------------------------------------------
 */
 
 Route::post('login', [AuthController::class, 'login'])->name('login');
 Route::post('users', [UserController::class, 'store'])->name('register');
 
-// ✅ ALTERAÇÃO AQUI: escolas agora é CRUD completo (inclui POST)
-Route::apiResource('escolas', EscolaController::class);
+// Escolas públicas (necessário para cadastro e visualização inicial)
+Route::apiResource('escolas', EscolaController::class)->only(['index', 'show', 'store']);
 
 Route::get('planos', [PlanoController::class, 'index']);
-Route::apiResource('enderecos', EnderecoController::class);
+Route::apiResource('enderecos', EnderecoController::class)->only(['store']);
+
 
 /*
 |--------------------------------------------------------------------------
-| Rotas Protegidas por Token (auth:sanctum)
+| ROTAS PROTEGIDAS (AUTH:SANTCUM)
 |--------------------------------------------------------------------------
 */
 
 Route::middleware('auth:sanctum')->group(function () {
 
-    // Auth
+    /* ================= AUTH ================= */
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('logout-all', [AuthController::class, 'logoutAll']);
     Route::post('token/refresh', [AuthController::class, 'refresh']);
 
-    // Roles e UserRoles
+
+    /* ================= ROLES ================= */
     Route::apiResource('roles', RoleController::class);
     Route::post('user-role', [UserRoleController::class, 'store']);
     Route::delete('user-role', [UserRoleController::class, 'destroy']);
 
-    // Usuários (todas as ações exceto store)
+
+    /* ================= USUÁRIOS ================= */
     Route::get('users', [UserController::class, 'index']);
     Route::get('users/{user}', [UserController::class, 'show']);
     Route::put('users/{user}', [UserController::class, 'update']);
     Route::delete('users/{user}', [UserController::class, 'destroy']);
 
-    // Grupo 2 - Escola / Cantina / Infra
+
+    /* ================= ESCOLAS ================= */
+    Route::apiResource('escolas', EscolaController::class)->except(['store']);
+
+
+    /* ================= CANTINAS ================= */
+
+    // ✅ CRÍTICO PARA O FRONTEND - rota exigida pelo dashboard da escola
+    Route::get('cantinas/escola/{id_escola}', [CantinaController::class, 'getBySchool']);
+
     Route::apiResource('cantinas', CantinaController::class);
+
+
+    /* ================= PRODUTOS ================= */
+
+    // ✅ CRÍTICO PARA O FRONTEND - produtos por cantina
+    Route::get('cantinas/{id_cantina}/produtos', [ProdutoController::class, 'getByCanteen']);
+
     Route::apiResource('produtos', ProdutoController::class);
 
-    // Pedidos e Itens
+
+    /* ================= ESTOQUE ================= */
+    Route::apiResource('estoques', EstoqueController::class);
+
+
+    /* ================= PEDIDOS ================= */
     Route::apiResource('pedidos', PedidoController::class);
     Route::apiResource('itens-pedido', ItemPedidoController::class);
 
-    // Carteira e Transações
+
+    /* ================= FINANCEIRO ================= */
     Route::apiResource('carteiras', CarteiraController::class);
     Route::apiResource('transacoes', TransacaoController::class);
 
-    // Controle Parental
+
+    /* ================= CONTROLE PARENTAL ================= */
     Route::apiResource('controle-parental', ControleParentalController::class);
     Route::apiResource('controle-parental-produto', ControleParentalProdutoController::class);
     Route::apiResource('user-dependencia', UserDependenciaController::class);
-
-    // Estoques
-    Route::apiResource('estoques', EstoqueController::class);
 });
