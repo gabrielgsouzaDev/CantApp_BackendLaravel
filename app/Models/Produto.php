@@ -17,12 +17,14 @@ class Produto extends Model
         'id_cantina',
         'nome',
         'preco',
-        'ativo'
+        'ativo', 
+        'categoria'
     ];
 
     protected $casts = [
         'ativo' => 'boolean',
-        'preco' => 'decimal:2'
+        'preco' => 'decimal:2',
+        'categoria' => 'string'
     ];
 
     public function cantina()

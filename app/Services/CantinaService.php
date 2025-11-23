@@ -37,4 +37,10 @@ class CantinaService
     {
         return $this->repository->delete($id);
     }
+
+    // ✅ ADICIONADO — usado no controller
+    public function getBySchool($id_escola)
+    {
+        return $this->repository->getBySchool($id_escola);
+    }
 }

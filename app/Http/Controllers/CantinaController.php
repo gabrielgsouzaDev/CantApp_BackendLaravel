@@ -72,4 +72,12 @@ class CantinaController extends Controller
 
         return response()->json(['data' => ['deleted' => true]]);
     }
+
+    // ✅ Buscar cantinas por escola (rota: GET api/cantinas/escola/{id_escola})
+    public function getBySchool($id_escola)
+    {
+        $cantinas = $this->service->getBySchool($id_escola);
+
+        return response()->json(['data' => $cantinas]);
+    }
 }
