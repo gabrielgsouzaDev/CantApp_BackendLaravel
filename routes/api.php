@@ -29,16 +29,15 @@ use App\Http\Controllers\EstoqueController;
 Route::post('login', [AuthController::class, 'login'])->name('login');
 Route::post('users', [UserController::class, 'store'])->name('register');
 
-// Escolas públicas (necessário para cadastro e visualização inicial)
+// Escolas públicas
 Route::apiResource('escolas', EscolaController::class)->only(['index', 'show', 'store']);
 
 Route::get('planos', [PlanoController::class, 'index']);
 Route::apiResource('enderecos', EnderecoController::class)->only(['store']);
 
-
 /*
 |--------------------------------------------------------------------------
-| ROTAS PROTEGIDAS (AUTH:SANTCUM)
+| ROTAS PROTEGIDAS (AUTH:SANCTUM)
 |--------------------------------------------------------------------------
 */
 
@@ -49,12 +48,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout-all', [AuthController::class, 'logoutAll']);
     Route::post('token/refresh', [AuthController::class, 'refresh']);
 
-
     /* ================= ROLES ================= */
     Route::apiResource('roles', RoleController::class);
     Route::post('user-role', [UserRoleController::class, 'store']);
     Route::delete('user-role', [UserRoleController::class, 'destroy']);
-
 
     /* ================= USUÁRIOS ================= */
     Route::get('users', [UserController::class, 'index']);
@@ -62,40 +59,27 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('users/{user}', [UserController::class, 'update']);
     Route::delete('users/{user}', [UserController::class, 'destroy']);
 
-
-    /* ================= ESCOLAS ================= */
-    Route::apiResource('escolas', EscolaController::class)->except(['store']);
-
+    /* ================= ESCOLAS PRIVADAS ================= */
+    Route::apiResource('escolas', EscolaController::class)->only(['update', 'destroy']);
 
     /* ================= CANTINAS ================= */
-
-    // ✅ CRÍTICO PARA O FRONTEND - rota exigida pelo dashboard da escola
     Route::get('cantinas/escola/{id_escola}', [CantinaController::class, 'getBySchool']);
-
     Route::apiResource('cantinas', CantinaController::class);
 
-
     /* ================= PRODUTOS ================= */
-
-    // ✅ CRÍTICO PARA O FRONTEND - produtos por cantina
     Route::get('cantinas/{id_cantina}/produtos', [ProdutoController::class, 'getByCanteen']);
-
     Route::apiResource('produtos', ProdutoController::class);
-
 
     /* ================= ESTOQUE ================= */
     Route::apiResource('estoques', EstoqueController::class);
-
 
     /* ================= PEDIDOS ================= */
     Route::apiResource('pedidos', PedidoController::class);
     Route::apiResource('itens-pedido', ItemPedidoController::class);
 
-
     /* ================= FINANCEIRO ================= */
     Route::apiResource('carteiras', CarteiraController::class);
     Route::apiResource('transacoes', TransacaoController::class);
-
 
     /* ================= CONTROLE PARENTAL ================= */
     Route::apiResource('controle-parental', ControleParentalController::class);
