@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\CarteiraService;
+use Illuminate\Support\Facades\DB;
+use App\Models\Carteira;
+use App\Models\TransacaoCarteira;
 
 class CarteiraController extends Controller
 {
@@ -14,20 +17,29 @@ class CarteiraController extends Controller
         $this->service = $service;
     }
 
+    /**
+     * Lista todas as carteiras.
+     */
     public function index()
     {
         return response()->json($this->service->all());
     }
 
+    /**
+     * Retorna uma carteira específica pelo ID da carteira.
+     */
     public function show($id)
     {
         return response()->json($this->service->find($id));
     }
 
+    /**
+     * Cria uma nova carteira.
+     */
     public function store(Request $request)
     {
         $data = $request->validate([
-            'id_user' => 'required|integer',
+            'id_user' => 'required|integer|unique:tb_carteira,id_user',
             'saldo' => 'numeric',
             'saldo_bloqueado' => 'numeric',
             'limite_recarregar' => 'numeric',
@@ -37,39 +49,64 @@ class CarteiraController extends Controller
         return response()->json($this->service->create($data));
     }
 
+    /**
+     * Atualiza uma carteira existente.
+     */
     public function update(Request $request, $id)
     {
         $data = $request->all();
         return response()->json($this->service->update($id, $data));
     }
 
+    /**
+     * Deleta uma carteira.
+     */
     public function destroy($id)
     {
         return response()->json(['deleted' => $this->service->delete($id)]);
     }
+
+    /**
+     * Busca a carteira de um usuário pelo ID do usuário. (NOVA ROTA)
+     */
+    public function getWalletByUser(string $id_usuario)
+    {
+        try {
+            // Assumindo que a coluna na tabela é 'id_user'
+            $carteira = Carteira::where('id_user', $id_usuario)->firstOrFail(); 
+            return response()->json($carteira->load('user'));
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Carteira do usuário não encontrada.'], 404);
+        }
+    }
+
+    /**
+     * Processa a recarga (crédito) na carteira de um usuário de forma segura.
+     * Esta é a função corrigida que estava causando o Erro 500.
+     */
     public function recharge(Request $request)
     {
         // 1. Validação dos dados de recarga
-        // Idealmente, usar um FormRequest, mas para o exemplo, usamos validate()
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
+            // Use 'id' se for o campo PK na tabela 'users', ou ajuste para 'id_user' se for o nome do campo
+            'user_id' => 'required|exists:users,id', 
             'valor' => 'required|numeric|min:0.01',
-            // 'descricao' => 'nullable|string', // Se quiser especificar a descrição (e.g., PIX/Boleto)
+            'descricao' => 'nullable|string', 
         ]);
 
         $userId = $validated['user_id'];
         $valorRecarga = $validated['valor'];
-        $descricao = $request->input('descricao', 'Recarga via PIX (Mock)');
+        $descricao = $request->input('descricao', 'Recarga via Pagamento');
 
-        // 2. Busca e Bloqueio da Carteira
         try {
-            // Inicia a transação de banco de dados
+            // INÍCIO DA TRANSAÇÃO: Garante a atomicidade
             DB::beginTransaction();
 
-            // CRÍTICO: Usa lockForUpdate() para bloquear a linha e prevenir concorrência
-            $carteira = Carteira::where('user_id', $userId)
-                                ->lockForUpdate()
-                                ->first();
+            // 2. Busca e Bloqueio da Carteira
+            // CRÍTICO: lockForUpdate() impede modificações simultâneas (concorrência)
+            $carteira = Carteira::where('id_user', $userId) 
+                                 ->lockForUpdate()
+                                 ->first();
 
             if (!$carteira) {
                 DB::rollBack();
@@ -82,31 +119,35 @@ class CarteiraController extends Controller
 
             // 4. Registro da Transação (Histórico)
             TransacaoCarteira::create([
-                'id_carteira' => $carteira->id_carteira,
+                // Ajuste 'id_carteira' se o campo for diferente (e.g., 'carteira_id')
+                'id_carteira' => $carteira->id, 
                 'tipo' => 'CREDITO',
                 'valor' => $valorRecarga,
                 'descricao' => $descricao,
-                'id_pedido' => null, // Não se aplica a recargas
+                'id_pedido' => null,
             ]);
 
+            // FIM DA TRANSAÇÃO: Se tudo deu certo, commita
             DB::commit();
 
             // 5. Resposta de Sucesso
             return response()->json([
                 'message' => 'Recarga realizada com sucesso.',
                 'saldo_atual' => $carteira->saldo,
-                'carteira' => $carteira->load('user'), // Retorna a carteira atualizada
+                'carteira' => $carteira->load('user'), 
             ], 200);
 
         } catch (\Exception $e) {
+            // Em caso de qualquer erro (ex: banco de dados, limite de recarga), desfaz
             DB::rollBack();
-            // Log do erro completo para debug
             \Log::error("Erro na Recarga da Carteira (UserID: {$userId}): " . $e->getMessage());
             
+            // Retorna 500 para sinalizar falha interna
             return response()->json([
                 'message' => 'Falha interna ao processar a recarga.', 
-                'error_detail' => $e->getMessage()
-            ], 500);
+                // Detalhe do erro para debug, remova em produção
+                'debug_error' => $e->getMessage()
+            ], 500); 
         }
     }
 }

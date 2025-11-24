@@ -72,4 +72,12 @@ class ProdutoController extends Controller
 
         return response()->json(['data' => ['deleted' => true]]);
     }
+    
+    // Método getByCanteen (assumindo que estava na sua Service, mas é comum estar no Controller)
+    public function getByCanteen(string $id_cantina)
+    {
+        // Certifique-se de que este método exista no ProdutoService
+        $produtos = $this->service->getProdutosByCantina($id_cantina); 
+        return response()->json(['data' => $produtos]);
+    }
 }

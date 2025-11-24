@@ -52,13 +52,16 @@ class PedidoController extends Controller
 
     public function store(Request $request)
     {
+        // VALIDAÇÃO: Aqui está o campo 'status' que o Front-end deve enviar!
         $data = $request->validate([
             'id_cantina' => 'required|integer',
             'id_comprador' => 'required|integer',
             'id_destinatario' => 'required|integer',
             'valor_total' => 'required|numeric|min:0',
-            'status' => ['required', 'string', Rule::in(['pendente'])],
+            // CRÍTICO: 'status' é requerido e deve ser 'pendente' no momento da criação
+            'status' => ['required', 'string', Rule::in(['pendente'])], 
             'items' => 'required|array', 
+            // Validações detalhadas dos itens (essenciais para o Erro 422)
             'items.*.productId' => 'required|integer|exists:tb_produto,id_produto',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.unitPrice' => 'required|numeric|min:0',
@@ -68,7 +71,8 @@ class PedidoController extends Controller
             $pedido = $this->service->createOrderWithItems($data);
             return response()->json($pedido, 201);
         } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
+            // Se o erro for na criação do pedido, retorna 422 ou 500 dependendo da causa
+            return response()->json(['message' => 'Falha na criação do pedido: ' . $e->getMessage()], 422);
         }
     }
 

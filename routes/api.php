@@ -88,8 +88,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     /* ================= FINANCEIRO ================= */
     Route::apiResource('carteiras', CarteiraController::class);
-    Route::get('carteiras/usuario/{id_usuario}', [CarteiraController::class, 'getWalletByUser']); // NOVA ROTA
-    // Rota para recarga 
+    // Rota para buscar carteira por usuário
+    Route::get('carteiras/usuario/{id_usuario}', [CarteiraController::class, 'getWalletByUser']); 
+    // Rota para recarga (protegida por middleware)
     Route::post('carteiras/recarregar', [CarteiraController::class, 'recharge'])->middleware('auth.role:Responsavel');
     Route::apiResource('transacoes', TransacaoController::class);
     Route::get('transacoes/usuario/{id_usuario}', [TransacaoController::class, 'getTransactionsByUser']);
@@ -99,5 +100,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('controle-parental', ControleParentalController::class);
     Route::apiResource('controle-parental-produto', ControleParentalProdutoController::class);
     Route::apiResource('user-dependencia', UserDependenciaController::class);
-    Route::post('responsavel/vincular-aluno', [UserDependenciaController::class, 'linkStudentToGuardian']); // NOVA ROTA
+    Route::post('responsavel/vincular-aluno', [UserDependenciaController::class, 'linkStudentToGuardian']); 
 });
