@@ -59,7 +59,7 @@ class PedidoController extends Controller
             'valor_total' => 'required|numeric|min:0',
             'status' => ['required', 'string', Rule::in(['pendente'])],
             'items' => 'required|array', 
-            'items.*.productId' => 'required|integer|exists:produtos,id',
+            'items.*.productId' => 'required|integer|exists:tb_produto,id_produto',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.unitPrice' => 'required|numeric|min:0',
         ]);
