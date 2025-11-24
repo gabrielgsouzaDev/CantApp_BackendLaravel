@@ -72,7 +72,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('produtos', ProdutoController::class);
 
     /* ================= FAVORITOS ================= */
-    // ✔ Seguro, simples e REST
     Route::get('favoritos/{id_user}', [ProdutoFavoritoController::class, 'index']);
     Route::post('favoritos', [ProdutoFavoritoController::class, 'store']);
     Route::delete('favoritos/{id_user}/{id_produto}', [ProdutoFavoritoController::class, 'destroy']);
@@ -81,20 +80,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('estoques', EstoqueController::class);
 
     /* ================= PEDIDOS ================= */
-// src/routes/api.php
-
-/* ================= PEDIDOS ================= */
     Route::apiResource('pedidos', PedidoController::class);
-    // Rota para listagem por aluno (já definida)
     Route::get('pedidos/usuario/{id_usuario}', [PedidoController::class, 'getOrdersByUser']);
-    // ⭐ NOVO: Rota para listagem por cantina (essencial para cantineiros)
     Route::get('pedidos/cantina/{id_cantina}', [PedidoController::class, 'getOrdersByCanteen']); 
-    // Rota para atualização de status (já definida)
     Route::patch('pedidos/{pedido}/status', [PedidoController::class, 'updateStatus']); 
     Route::apiResource('itens-pedido', ItemPedidoController::class);
 
     /* ================= FINANCEIRO ================= */
     Route::apiResource('carteiras', CarteiraController::class);
+    Route::get('carteiras/usuario/{id_usuario}', [CarteiraController::class, 'getWalletByUser']); // NOVA ROTA
     Route::apiResource('transacoes', TransacaoController::class);
     Route::get('transacoes/usuario/{id_usuario}', [TransacaoController::class, 'getTransactionsByUser']);
     Route::get('transacoes/cantina/{id_cantina}', [TransacaoController::class, 'getTransactionsByCanteen']);
@@ -103,4 +97,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('controle-parental', ControleParentalController::class);
     Route::apiResource('controle-parental-produto', ControleParentalProdutoController::class);
     Route::apiResource('user-dependencia', UserDependenciaController::class);
+    Route::post('responsavel/vincular-aluno', [UserDependenciaController::class, 'linkStudentToGuardian']); // NOVA ROTA
 });

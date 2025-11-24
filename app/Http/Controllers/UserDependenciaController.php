@@ -38,4 +38,18 @@ class UserDependenciaController extends Controller
     {
         return response()->json(['deleted' => $this->service->delete($responsavelId, $dependenteId)]);
     }
+
+    public function linkStudentToGuardian(Request $request) {
+    $request->validate([
+        'guardian_id' => 'required|exists:users,id',
+        'student_id' => 'required|exists:users,id',
+    ]);
+
+    UserDependencia::create([
+        'guardian_id' => $request->guardian_id,
+        'student_id' => $request->student_id,
+    ]);
+
+    return response()->json(['message' => 'Aluno vinculado ao responsável com sucesso']);
+}
 }
