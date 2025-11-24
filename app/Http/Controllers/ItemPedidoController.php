@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\ItemPedidoService;
+use App\Models\Produto;
 
 class ItemPedidoController extends Controller
 {
@@ -29,9 +30,16 @@ class ItemPedidoController extends Controller
         $data = $request->validate([
             'id_pedido' => 'required|integer',
             'id_produto' => 'required|integer',
-            'quantidade' => 'required|integer',
-            'preco_unitario' => 'required|numeric'
+            'quantidade' => 'required|integer'
         ]);
+
+        // Busca o preço do produto no backend
+        $produto = Produto::find($data['id_produto']);
+        if (!$produto) {
+            return response()->json(['message' => 'Produto não encontrado'], 404);
+        }
+
+        $data['preco_unitario'] = $produto->price;
 
         return response()->json($this->service->create($data));
     }
