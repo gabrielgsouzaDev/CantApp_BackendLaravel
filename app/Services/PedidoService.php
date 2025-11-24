@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Repositories\PedidoRepository;
+use App\Services\CarteiraService;
+use App\Services\EstoqueService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Exception;
@@ -10,10 +12,17 @@ use Exception;
 class PedidoService
 {
     protected $repository;
+    protected $carteiraService;
+    protected $estoqueService;
 
-    public function __construct(PedidoRepository $repository)
-    {
+    public function __construct(
+        PedidoRepository $repository,
+        CarteiraService $carteiraService,
+        EstoqueService $estoqueService
+    ) {
         $this->repository = $repository;
+        $this->carteiraService = $carteiraService;
+        $this->estoqueService = $estoqueService;
     }
 
     public function all()
@@ -41,23 +50,27 @@ class PedidoService
     }
 
     /**
-     * Cria um pedido com itens, preparado para futuras integrações:
-     * - Controle Parental
-     * - Débito na carteira
-     * - Decremento de estoque
-     * - API de pagamento (Pix/Cartão)
+     * Cria um pedido com itens, debita carteira do comprador e decrementa estoque.
      */
     public function createOrderWithItems(array $data)
     {
         return DB::transaction(function () use ($data) {
+            $idComprador = $data['id_comprador'];
+            $valorTotal = $data['valor_total'];
 
-            // TODO: Validar controle parental aqui
-            // TODO: Integrar com carteira para débito do usuário
-            // TODO: Checar estoque disponível e decrementar
+            // 1. Debitar o valor da carteira do comprador
+            $this->carteiraService->debit($idComprador, $valorTotal);
 
+            // 2. Decrementar o estoque dos produtos
+            foreach ($data['items'] as $item) {
+                $this->estoqueService->decrementStock($item['productId'], $item['quantity']);
+            }
+
+            // 3. Criar o pedido com os itens
             $pedido = $this->repository->createOrderWithItems($data);
 
-            // TODO: Caso pagamento via Pix/Stripe seja aprovado, confirmar pedido
+            // 4. (Opcional) Criar transações de débito no extrato
+            // TODO: Implementar registro de transação formal
 
             return $pedido;
         });
@@ -74,18 +87,21 @@ class PedidoService
     }
 
     /**
-     * Atualiza status do pedido, preparado para futuras regras:
-     * - Se cancelado: reembolsar carteira e estornar estoque
+     * Atualiza status do pedido, com lógica para reembolso e estorno de estoque se cancelado
      */
     public function updateStatus($id, string $status)
     {
         return DB::transaction(function () use ($id, $status) {
-
             $pedido = $this->repository->updateStatus($id, $status);
 
             if ($status === 'cancelado') {
-                // TODO: Reembolsar valor para o comprador
-                // TODO: Incrementar estoque dos itens
+                // Reembolsar valor para o comprador
+                $this->carteiraService->credit($pedido->id_comprador, $pedido->valor_total);
+
+                // Estornar estoque dos itens
+                foreach ($pedido->itens as $item) {
+                    $this->estoqueService->incrementStock($item->id_produto, $item->quantidade);
+                }
             }
 
             return $pedido;
