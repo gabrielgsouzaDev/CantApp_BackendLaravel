@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\TransacaoService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class TransacaoController extends Controller
 {
@@ -14,16 +15,33 @@ class TransacaoController extends Controller
         $this->service = $service;
     }
 
+    /**
+     * Listar todas as transações
+     */
     public function index()
     {
-        return response()->json($this->service->all());
+        return response()->json(['data' => $this->service->all()]);
     }
 
+    /**
+     * Mostrar uma transação específica
+     */
     public function show($id)
     {
-        return response()->json($this->service->find($id));
+        try {
+            $transacao = $this->service->find($id);
+            if (!$transacao) {
+                return response()->json(['message' => 'Transação não encontrada'], 404);
+            }
+            return response()->json(['data' => $transacao]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erro ao buscar transação: ' . $e->getMessage()], 400);
+        }
     }
 
+    /**
+     * Criar nova transação
+     */
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -38,36 +56,71 @@ class TransacaoController extends Controller
             'status' => 'required|string'
         ]);
 
-        return response()->json($this->service->create($data));
+        try {
+            $transacao = $this->service->create($data);
+            return response()->json(['data' => $transacao], 201);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erro ao criar transação: ' . $e->getMessage()], 400);
+        }
     }
 
+    /**
+     * Atualizar transação
+     */
     public function update(Request $request, $id)
     {
         $data = $request->all();
-        return response()->json($this->service->update($id, $data));
+
+        try {
+            $transacao = $this->service->update($id, $data);
+            if (!$transacao) {
+                return response()->json(['message' => 'Transação não encontrada'], 404);
+            }
+            return response()->json(['data' => $transacao]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erro ao atualizar transação: ' . $e->getMessage()], 400);
+        }
     }
 
+    /**
+     * Deletar transação
+     */
     public function destroy($id)
     {
-        return response()->json(['deleted' => $this->service->delete($id)]);
+        try {
+            $deleted = $this->service->delete($id);
+            if (!$deleted) {
+                return response()->json(['message' => 'Transação não encontrada'], 404);
+            }
+            return response()->json(['data' => ['deleted' => true]]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erro ao deletar transação: ' . $e->getMessage()], 400);
+        }
     }
 
+    /**
+     * Buscar transações de um usuário específico
+     */
     public function getTransactionsByUser(string $id_usuario)
-{
-    try {
-        $transacoes = $this->service->getTransacoesByUserId($id_usuario);
-        return response()->json(['data' => $transacoes]); 
-    } catch (\Exception $e) {
-        return response()->json(['message' => 'Erro ao buscar transações do usuário.'], 500);
+    {
+        try {
+            $transacoes = $this->service->getTransacoesByUserId($id_usuario);
+            return response()->json(['data' => $transacoes]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erro ao buscar transações do usuário: ' . $e->getMessage()], 500);
+        }
     }
-}
+
+    /**
+     * Buscar transações de uma cantina específica
+     */
     public function getTransactionsByCanteen(string $id_cantina)
     {
         try {
             $transacoes = $this->service->getTransacoesByCanteenId($id_cantina);
-            return response()->json(['data' => $transacoes]); 
+            return response()->json(['data' => $transacoes]);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Erro ao buscar transações da cantina.'], 500);
+            return response()->json(['message' => 'Erro ao buscar transações da cantina: ' . $e->getMessage()], 500);
         }
     }
 }
