@@ -3,6 +3,8 @@
 namespace App\Repositories;
 
 use App\Models\Estoque;
+use Illuminate\Support\Facades\DB;
+use Exception;
 
 class EstoqueRepository
 {
@@ -45,5 +47,40 @@ class EstoqueRepository
             return $estoque->delete();
         }
         return false;
+    }
+
+    /**
+     * Decrementa estoque com validação
+     */
+    public function decrementStock(int $productId, int $quantity)
+    {
+        return DB::transaction(function () use ($productId, $quantity) {
+            $estoque = $this->model->find($productId);
+            if (!$estoque) {
+                throw new Exception("Estoque do produto não encontrado");
+            }
+            if ($estoque->quantidade < $quantity) {
+                throw new Exception("Estoque insuficiente");
+            }
+            $estoque->quantidade -= $quantity;
+            $estoque->save();
+            return $estoque;
+        });
+    }
+
+    /**
+     * Incrementa estoque (ex: pedido cancelado)
+     */
+    public function incrementStock(int $productId, int $quantity)
+    {
+        return DB::transaction(function () use ($productId, $quantity) {
+            $estoque = $this->model->find($productId);
+            if (!$estoque) {
+                throw new Exception("Estoque do produto não encontrado");
+            }
+            $estoque->quantidade += $quantity;
+            $estoque->save();
+            return $estoque;
+        });
     }
 }

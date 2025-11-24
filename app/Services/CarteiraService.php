@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Repositories\CarteiraRepository;
+use Illuminate\Support\Facades\DB;
+use Exception;
 
 class CarteiraService
 {
@@ -36,5 +38,28 @@ class CarteiraService
     public function delete($id)
     {
         return $this->repository->delete($id);
+    }
+
+    public function debit(int $userId, float $amount)
+    {
+        return DB::transaction(function () use ($userId, $amount) {
+            $carteira = $this->repository->findByUserId($userId);
+            if (!$carteira) throw new Exception("Carteira do usuário não encontrada");
+            if ($carteira->saldo < $amount) throw new Exception("Saldo insuficiente");
+            $carteira->saldo -= $amount;
+            $carteira->save();
+            return $carteira;
+        });
+    }
+
+    public function credit(int $userId, float $amount)
+    {
+        return DB::transaction(function () use ($userId, $amount) {
+            $carteira = $this->repository->findByUserId($userId);
+            if (!$carteira) throw new Exception("Carteira do usuário não encontrada");
+            $carteira->saldo += $amount;
+            $carteira->save();
+            return $carteira;
+        });
     }
 }

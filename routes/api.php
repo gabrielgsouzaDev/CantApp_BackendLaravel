@@ -81,7 +81,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('estoques', EstoqueController::class);
 
     /* ================= PEDIDOS ================= */
+// src/routes/api.php
+
+/* ================= PEDIDOS ================= */
     Route::apiResource('pedidos', PedidoController::class);
+    // Rota para listagem por aluno (já definida)
+    Route::get('pedidos/usuario/{id_usuario}', [PedidoController::class, 'getOrdersByUser']);
+    // ⭐ NOVO: Rota para listagem por cantina (essencial para cantineiros)
+    Route::get('pedidos/cantina/{id_cantina}', [PedidoController::class, 'getOrdersByCanteen']); 
+    // Rota para atualização de status (já definida)
+    Route::patch('pedidos/{pedido}/status', [PedidoController::class, 'updateStatus']); 
     Route::apiResource('itens-pedido', ItemPedidoController::class);
 
     /* ================= FINANCEIRO ================= */

@@ -23,6 +23,11 @@ class CarteiraRepository
         return $this->model->with(['user', 'transacoes'])->find($id);
     }
 
+    public function findByUserId($userId)
+    {
+        return $this->model->with(['user', 'transacoes'])->where('id_user', $userId)->first();
+    }
+
     public function create(array $data)
     {
         return $this->model->create($data);
