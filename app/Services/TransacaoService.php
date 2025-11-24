@@ -37,4 +37,16 @@ class TransacaoService
     {
         return $this->repository->delete($id);
     }
+
+    // Busca transações de um usuário específico
+    public function getTransacoesByUserId(string $userId)
+    {
+        return $this->repository->getByUserId($userId);
+    }
+
+    // Busca transações relacionadas a uma cantina específica
+    public function getTransacoesByCanteenId(string $cantinaId)
+    {
+        return $this->repository->getByCanteenId($cantinaId);
+    }
 }

@@ -51,4 +51,23 @@ class TransacaoController extends Controller
     {
         return response()->json(['deleted' => $this->service->delete($id)]);
     }
+
+    public function getTransactionsByUser(string $id_usuario)
+{
+    try {
+        $transacoes = $this->service->getTransacoesByUserId($id_usuario);
+        return response()->json(['data' => $transacoes]); 
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'Erro ao buscar transações do usuário.'], 500);
+    }
+}
+    public function getTransactionsByCanteen(string $id_cantina)
+    {
+        try {
+            $transacoes = $this->service->getTransacoesByCanteenId($id_cantina);
+            return response()->json(['data' => $transacoes]); 
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erro ao buscar transações da cantina.'], 500);
+        }
+    }
 }

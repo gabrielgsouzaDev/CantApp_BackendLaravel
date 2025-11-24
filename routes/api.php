@@ -96,6 +96,8 @@ Route::middleware('auth:sanctum')->group(function () {
     /* ================= FINANCEIRO ================= */
     Route::apiResource('carteiras', CarteiraController::class);
     Route::apiResource('transacoes', TransacaoController::class);
+    Route::get('transacoes/usuario/{id_usuario}', [TransacaoController::class, 'getTransactionsByUser']);
+    Route::get('transacoes/cantina/{id_cantina}', [TransacaoController::class, 'getTransactionsByCanteen']);
 
     /* ================= CONTROLE PARENTAL ================= */
     Route::apiResource('controle-parental', ControleParentalController::class);
