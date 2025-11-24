@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Services\CarteiraService;
 use Illuminate\Support\Facades\DB;
 use App\Models\Carteira;
-use App\Models\TransacaoCarteira;
+use App\Models\Transacao;
 
 class CarteiraController extends Controller
 {
@@ -118,7 +118,7 @@ class CarteiraController extends Controller
             $carteira->save();
 
             // 4. Registro da Transação (Histórico)
-            TransacaoCarteira::create([
+            Transacao::create([
                 // Ajuste 'id_carteira' se o campo for diferente (e.g., 'carteira_id')
                 'id_carteira' => $carteira->id, 
                 'tipo' => 'CREDITO',
