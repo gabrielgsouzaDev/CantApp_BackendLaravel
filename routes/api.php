@@ -91,7 +91,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Rota para buscar carteira por usuário
     Route::get('carteiras/usuario/{id_usuario}', [CarteiraController::class, 'getWalletByUser']); 
     // Rota para recarga (protegida por middleware)
-    Route::post('carteiras/recarregar', [CarteiraController::class, 'recharge'])->middleware('auth.role:Responsavel');
+    Route::post('carteiras/recarregar', [CarteiraController::class, 'recharge'])->middleware('auth:sanctum');
     Route::apiResource('transacoes', TransacaoController::class);
     Route::get('transacoes/usuario/{id_usuario}', [TransacaoController::class, 'getTransactionsByUser']);
     Route::get('transacoes/cantina/{id_cantina}', [TransacaoController::class, 'getTransactionsByCanteen']);
