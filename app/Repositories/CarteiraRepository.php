@@ -3,66 +3,61 @@
 namespace App\Repositories;
 
 use App\Models\Carteira;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
 
 class CarteiraRepository
 {
     protected $model;
 
-    public function __construct(Carteira $carteira)
+    public function __construct(Carteira $model)
     {
-        $this->model = $carteira;
-    }
-
-    public function all()
-    {
-        return $this->model->with(['user', 'transacoes'])->get();
-    }
-
-    public function find($id)
-    {
-        // Usamos findOrFail para lançar 404 se não encontrado (melhor que find)
-        return $this->model->with(['user', 'transacoes'])->findOrFail($id);
-    }
-    
-    // Método de leitura padrão (sem bloqueio)
-    public function findByUserId(int $userId): ?Carteira
-    {
-        return $this->model->where('id_user', $userId)->first();
+        $this->model = $model;
     }
 
     /**
-     * CRÍTICO: Busca a carteira pelo ID do usuário e aplica bloqueio pessimista (FOR UPDATE).
+     * Busca a carteira de um usuário específica para atualização (lockForUpdate).
+     * Essencial para evitar condições de corrida (race conditions) em operações financeiras.
+     *
+     * @param int $userId
+     * @return \App\Models\Carteira|null
      */
     public function findByUserIdForUpdate(int $userId): ?Carteira
     {
-        // lockForUpdate() é a chave para evitar problemas de concorrência no CarteiraService
-        return $this->model->where('id_user', $userId)->lockForUpdate()->first();
+        // 1. Encontra a carteira pelo ID do usuário
+        $carteira = $this->model->where('user_id', $userId)->first();
+        
+        if ($carteira) {
+            // 2. Bloqueia a linha no banco de dados.
+            // Isso DEVE ser executado dentro de uma transação DB::transaction.
+            return $this->model
+                        ->where('id_carteira', $carteira->id_carteira)
+                        ->lockForUpdate() // Aplica o bloqueio pessimista
+                        ->first();
+        }
+        
+        return null;
     }
 
-    public function create(array $data): Carteira
-    {
-        return $this->model->create($data);
-    }
-
-    public function update($id, array $data): Carteira
-    {
-        $carteira = $this->model->findOrFail($id); // Uso do findOrFail
-        $carteira->update($data);
-        return $carteira;
-    }
-
-    public function delete($id): bool
-    {
-        $carteira = $this->model->findOrFail($id); // Uso do findOrFail
-        return $carteira->delete();
-    }
-    
     /**
-     * CRÍTICO: Método simples para salvar a instância do Model no Service.
+     * Salva ou atualiza uma instância de Carteira (usado para salvar o novo saldo).
+     *
+     * @param \App\Models\Carteira $carteira
+     * @return bool
      */
     public function save(Carteira $carteira): bool
     {
         return $carteira->save();
+    }
+    
+    // Outros métodos CRUD podem ser adicionados aqui conforme o MVP exigir...
+    
+    public function findByUserId(int $userId): ?Carteira
+    {
+        return $this->model->where('user_id', $userId)->first();
+    }
+    
+    public function create(array $data): Carteira
+    {
+        return $this->model->create($data);
     }
 }

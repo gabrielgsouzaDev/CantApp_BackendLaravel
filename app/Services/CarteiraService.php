@@ -52,7 +52,7 @@ class CarteiraService
             $carteira->saldo -= $amount;
             $this->repository->save($carteira);
 
-            // 4. Registro da Transação - Usando a chave primária correta
+            // 4. Registro da Transação
             Transacao::create([
                 'id_carteira' => $carteira->id_carteira, 
                 'id_user_autor' => $userId, 
@@ -62,7 +62,8 @@ class CarteiraService
                 'valor' => $amount,
                 'descricao' => $descricao,
                 'referencia' => null,
-                'status' => 'CONCLUIDO',
+                // CORRIGIDO: O status deve ser 'concluida' para bater com o ENUM do banco de dados.
+                'status' => 'concluida', 
             ]);
 
             return $carteira;
@@ -94,17 +95,20 @@ class CarteiraService
             $carteira->saldo += $amount;
             $this->repository->save($carteira);
 
-            // 3. Registro da Transação - Usando a chave primária correta
+            // 3. Registro da Transação
             Transacao::create([
                 'id_carteira' => $carteira->id_carteira, // Usando a PK 'id_carteira'
                 'id_user_autor' => $userId, 
                 'id_aprovador' => null, 
                 'uuid' => (string) Str::uuid(),
-                'tipo' => 'CREDITO',
+                // NOTA: O 'tipo' para recarga pode ser 'Recarregar' ou 'PIX' dependendo da origem.
+                // Mantendo 'CREDITO' por enquanto.
+                'tipo' => 'CREDITO', 
                 'valor' => $amount,
                 'descricao' => $descricao,
                 'referencia' => null,
-                'status' => 'CONCLUIDO',
+                // CORRIGIDO: O status deve ser 'concluida' para bater com o ENUM do banco de dados.
+                'status' => 'concluida', 
             ]);
 
             return $carteira;
