@@ -32,12 +32,12 @@ class CarteiraController extends Controller
     {
         // 1. Validação dos dados de recarga
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id', 
+            'id_user' => 'required|exists:users,id', 
             'valor' => 'required|numeric|min:0.01',
             'descricao' => 'nullable|string', 
         ]);
 
-        $userId = $validated['user_id'];
+        $userId = $validated['id_user'];
         $valorRecarga = $validated['valor'];
         $descricao = $request->input('descricao', 'Recarga via Pagamento');
 
