@@ -3,14 +3,15 @@
 namespace App\Repositories;
 
 use App\Models\Carteira;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class CarteiraRepository
 {
     protected $model;
 
-    public function __construct(Carteira $model)
+    public function __construct(Carteira $carteira)
     {
-        $this->model = $model;
+        $this->model = $carteira;
     }
 
     public function all()
@@ -20,35 +21,48 @@ class CarteiraRepository
 
     public function find($id)
     {
-        return $this->model->with(['user', 'transacoes'])->find($id);
+        // Usamos findOrFail para lançar 404 se não encontrado (melhor que find)
+        return $this->model->with(['user', 'transacoes'])->findOrFail($id);
     }
-
-    public function findByUserId($userId)
+    
+    // Método de leitura padrão (sem bloqueio)
+    public function findByUserId(int $userId): ?Carteira
     {
-        return $this->model->with(['user', 'transacoes'])->where('id_user', $userId)->first();
+        return $this->model->where('id_user', $userId)->first();
     }
 
-    public function create(array $data)
+    /**
+     * CRÍTICO: Busca a carteira pelo ID do usuário e aplica bloqueio pessimista (FOR UPDATE).
+     */
+    public function findByUserIdForUpdate(int $userId): ?Carteira
+    {
+        // lockForUpdate() é a chave para evitar problemas de concorrência no CarteiraService
+        return $this->model->where('id_user', $userId)->lockForUpdate()->first();
+    }
+
+    public function create(array $data): Carteira
     {
         return $this->model->create($data);
     }
 
-    public function update($id, array $data)
+    public function update($id, array $data): Carteira
     {
-        $carteira = $this->model->find($id);
-        if ($carteira) {
-            $carteira->update($data);
-            return $carteira;
-        }
-        return null;
+        $carteira = $this->model->findOrFail($id); // Uso do findOrFail
+        $carteira->update($data);
+        return $carteira;
     }
 
-    public function delete($id)
+    public function delete($id): bool
     {
-        $carteira = $this->model->find($id);
-        if ($carteira) {
-            return $carteira->delete();
-        }
-        return false;
+        $carteira = $this->model->findOrFail($id); // Uso do findOrFail
+        return $carteira->delete();
+    }
+    
+    /**
+     * CRÍTICO: Método simples para salvar a instância do Model no Service.
+     */
+    public function save(Carteira $carteira): bool
+    {
+        return $carteira->save();
     }
 }
