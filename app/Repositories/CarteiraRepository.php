@@ -24,7 +24,8 @@ class CarteiraRepository
     public function findByUserIdForUpdate(int $userId): ?Carteira
     {
         // 1. Encontra a carteira pelo ID do usuário
-        $carteira = $this->model->where('user_id', $userId)->first();
+        // CORRIGIDO: Usando 'id_user' em vez de 'user_id' para alinhar com o esquema de banco de dados não-padrão.
+        $carteira = $this->model->where('id_user', $userId)->first();
         
         if ($carteira) {
             // 2. Bloqueia a linha no banco de dados.
@@ -53,7 +54,8 @@ class CarteiraRepository
     
     public function findByUserId(int $userId): ?Carteira
     {
-        return $this->model->where('user_id', $userId)->first();
+        // CORRIGIDO: Usando 'id_user' em vez de 'user_id'
+        return $this->model->where('id_user', $userId)->first();
     }
     
     public function create(array $data): Carteira
