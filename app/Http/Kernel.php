@@ -31,6 +31,7 @@ class Kernel extends HttpKernel
         'auth' => \App\Http\Middleware\Authenticate::class,
         'auth:sanctum' => \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         'bindings' => \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        // RESTAURADO: Alias para a classe RoleMiddleware que você confirmou existir.
         'role' => \App\Http\Middleware\RoleMiddleware::class,
     ];
 }
