@@ -15,19 +15,16 @@ class TransacaoService
 
     public function all()
     {
-        // R4: Adicionar Eager Loading with(['carteira', 'autor'])
         return $this->repository->all();
     }
 
     public function find($id)
     {
-        // R4: Adicionar Eager Loading with(['carteira', 'autor'])
         return $this->repository->find($id);
     }
 
     public function create(array $data)
     {
-        // R10: Este método DEVE ser chamado apenas pelo PedidoService ou CarteiraService (transacionalmente)
         return $this->repository->create($data);
     }
 
@@ -42,25 +39,20 @@ class TransacaoService
     }
 
     /**
-     * CRÍTICO R18: Método com nomenclatura correta e lógica de busca.
+     * CRÍTICO R20: Corrigido. A chamada agora delega a query ao Repositório.
+     * O método 'model()' foi removido daqui.
      */
     public function getTransactionsByUser(string $userId)
     {
-        return $this->repository->model()
-            // Busca transações onde o usuário é o AUTOR OU O APROVADOR
-            ->where('id_user_autor', $userId) 
-            ->orWhere('id_aprovador', $userId)
-            ->with(['carteira', 'autor']) 
-            ->orderBy('created_at', 'desc')
-            ->get(); // Não usamos findOrFail para permitir listas vazias
+        // Chama o método no Repositório que irá construir a query
+        return $this->repository->getByUser($userId);
     }
 
     /**
-     * CRÍTICO R18: Método renomeado para convenção correta.
+     * CRÍTICO R18/R20: Método renomeado para convenção correta e delega ao Repositório.
      */
     public function getTransactionsByCanteenId(string $cantinaId)
     {
-        // R18/R7: Assumindo que o Repositório implementa a lógica complexa de busca (ex: JOIN com Pedidos/Cantina)
         return $this->repository->getByCanteenId($cantinaId);
     }
 }
