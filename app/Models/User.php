@@ -24,11 +24,12 @@ class User extends Authenticatable
         'senha_hash',
         'id_escola',
         'id_cantina',
-        'ativo'
+        'ativo',
+        'role' // CRÍTICO R3/R7: Adicionado para flexibilidade de Mass Assignment e uso futuro
     ];
 
     protected $hidden = [
-        'senha_hash',
+        'senha_hash', // Mantido por convenção
         'remember_token',
     ];
 
@@ -39,8 +40,7 @@ class User extends Authenticatable
 
     /**
      * Get the password for authentication.
-     * Isso permite que o Laravel use senha_hash no Auth::attempt()
-     *
+     * CRÍTICO: Permite que o Laravel use 'senha_hash' no Auth::attempt().
      * @return string
      */
     public function getAuthPassword()
@@ -56,7 +56,7 @@ class User extends Authenticatable
             'tb_user_role',
             'id_user',
             'id_role'
-        ); // remover withTimestamps() se a tabela pivô não tiver created_at/updated_at
+        );
     }
 
     // Relação com escola e cantina
