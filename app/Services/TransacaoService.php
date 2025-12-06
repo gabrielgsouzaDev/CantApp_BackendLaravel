@@ -38,11 +38,20 @@ class TransacaoService
         return $this->repository->delete($id);
     }
 
-    // Busca transações de um usuário específico
-    public function getTransacoesByUserId(string $userId)
-    {
-        return $this->repository->getByUserId($userId);
-    }
+    public function getTransactionsByUser(string $userId)
+{
+    // CRÍTICO: Assume-se que o erro está aqui, onde a busca falha.
+    // O Service DEVE buscar transações onde o usuário é o AUTOR.
+    
+    return $this->repository->model()
+        // O relacionamento 'autor' ou o campo 'id_user_autor' deve ser usado
+        ->where('id_user_autor', $userId) 
+        // Adicionamos um OR para buscar transações onde ele é o aprovador, se necessário
+        ->orWhere('id_aprovador', $userId)
+        ->with(['carteira', 'autor']) // Eager Loading R4
+        ->orderBy('created_at', 'desc')
+        ->get(); // Usar get() em vez de findOrFail() para evitar erro 404/400 se não houver transações.
+}
 
     // Busca transações relacionadas a uma cantina específica
     public function getTransacoesByCanteenId(string $cantinaId)
