@@ -16,13 +16,14 @@ class Transacao extends Model
     protected $fillable = [
         'id_carteira',
         'id_user_autor',
-        'id_aprovador',
-        'uuid',
+        // CRÍTICO R10: Campos de log e rastreabilidade adicionados ao fillable
+        'id_aprovador', 
+        'uuid',         
         'tipo',
         'valor',
         'descricao',
-        'referencia',
-        'status'
+        'referencia',   // Usado para ligar ao ID do Pedido/Recarga
+        'status'        // Status da transação
     ];
 
     protected $casts = [

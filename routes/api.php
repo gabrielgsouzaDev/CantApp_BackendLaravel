@@ -28,18 +28,20 @@ use App\Http\Controllers\ProdutoFavoritoController;
 */
 
 Route::post('login', [AuthController::class, 'login'])->name('login');
-Route::post('users', [UserController::class, 'store'])->name('register');
+Route::post('users', [UserController::class, 'store'])->name('register'); // Rota de registro
 
-// Escolas públicas
-Route::apiResource('escolas', EscolaController::class)->only(['index', 'show', 'store']);
-
+// Rotas de leitura pública (Ex: listar escolas para seleção no registro)
+Route::apiResource('escolas', EscolaController::class)->only(['index', 'show']);
 Route::get('planos', [PlanoController::class, 'index']);
-Route::apiResource('enderecos', EnderecoController::class)->only(['store']);
+Route::apiResource('enderecos', EnderecoController::class)->only(['store']); // Criação de endereço pode ser pública dependendo do fluxo de registro
 
 /*
 |--------------------------------------------------------------------------
 | ROTAS PROTEGIDAS (AUTH:SANCTUM)
 |--------------------------------------------------------------------------
+|
+| Todas as rotas neste grupo exigem um Bearer Token válido.
+|
 */
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -55,13 +57,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('user-role', [UserRoleController::class, 'destroy']);
 
     /* ================= USUÁRIOS ================= */
-    Route::get('users', [UserController::class, 'index']);
-    Route::get('users/{user}', [UserController::class, 'show']);
-    Route::put('users/{user}', [UserController::class, 'update']);
-    Route::delete('users/{user}', [UserController::class, 'destroy']);
+    // A rota 'store' foi movida para o bloco público (registro)
+    Route::apiResource('users', UserController::class)->except(['store']); 
 
     /* ================= ESCOLAS PRIVADAS ================= */
-    Route::apiResource('escolas', EscolaController::class)->only(['update', 'destroy']);
+    // Rotas de manipulação (Admin/Escola)
+    Route::apiResource('escolas', EscolaController::class)->only(['update', 'destroy', 'store']); // 'store' movida para cá se for para Admin cadastrar
 
     /* ================= CANTINAS ================= */
     Route::get('cantinas/escola/{id_escola}', [CantinaController::class, 'getBySchool']);
@@ -72,7 +73,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('produtos', ProdutoController::class);
 
     /* ================= FAVORITOS ================= */
-    Route::get('favoritos/{id_user}', [ProdutoFavoritoController::class, 'index']);
+    Route::get('favoritos/usuario/{id_user}', [ProdutoFavoritoController::class, 'index']);
     Route::post('favoritos', [ProdutoFavoritoController::class, 'store']);
     Route::delete('favoritos/{id_user}/{id_produto}', [ProdutoFavoritoController::class, 'destroy']);
 
@@ -80,18 +81,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('estoques', EstoqueController::class);
 
     /* ================= PEDIDOS ================= */
-    Route::apiResource('pedidos', PedidoController::class);
+    Route::apiResource('pedidos', PedidoController::class); // Inclui POST /pedidos (store)
     Route::get('pedidos/usuario/{id_usuario}', [PedidoController::class, 'getOrdersByUser']);
     Route::get('pedidos/cantina/{id_cantina}', [PedidoController::class, 'getOrdersByCanteen']); 
-    Route::patch('pedidos/{pedido}/status', [PedidoController::class, 'updateStatus']); 
+    Route::patch('pedidos/{pedido}/status', [PedidoController::class, 'updateStatus']); // Rota de PATCH para Cantineiro
     Route::apiResource('itens-pedido', ItemPedidoController::class);
 
     /* ================= FINANCEIRO ================= */
     Route::apiResource('carteiras', CarteiraController::class);
-    // Rota para buscar carteira por usuário
-    Route::get('carteiras/usuario/{id_usuario}', [CarteiraController::class, 'getWalletByUser']); 
-    // Rota para recarga (protegida por middleware)
-    Route::post('carteiras/recarregar', [CarteiraController::class, 'recharge'])->middleware('auth:sanctum');
+    Route::get('carteiras/usuario/{id_usuario}', [CarteiraController::class, 'getWalletByUser']);
+    // CRÍTICO R7: Removida a redundância do ->middleware('auth:sanctum')
+    Route::post('carteiras/recarregar', [CarteiraController::class, 'recharge']); 
+    
     Route::apiResource('transacoes', TransacaoController::class);
     Route::get('transacoes/usuario/{id_usuario}', [TransacaoController::class, 'getTransactionsByUser']);
     Route::get('transacoes/cantina/{id_cantina}', [TransacaoController::class, 'getTransactionsByCanteen']);
