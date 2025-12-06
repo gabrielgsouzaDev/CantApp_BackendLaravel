@@ -15,16 +15,19 @@ class TransacaoService
 
     public function all()
     {
+        // R4: Adicionar Eager Loading with(['carteira', 'autor'])
         return $this->repository->all();
     }
 
     public function find($id)
     {
+        // R4: Adicionar Eager Loading with(['carteira', 'autor'])
         return $this->repository->find($id);
     }
 
     public function create(array $data)
     {
+        // R10: Este método DEVE ser chamado apenas pelo PedidoService ou CarteiraService (transacionalmente)
         return $this->repository->create($data);
     }
 
@@ -38,24 +41,26 @@ class TransacaoService
         return $this->repository->delete($id);
     }
 
+    /**
+     * CRÍTICO R18: Método com nomenclatura correta e lógica de busca.
+     */
     public function getTransactionsByUser(string $userId)
-{
-    // CRÍTICO: Assume-se que o erro está aqui, onde a busca falha.
-    // O Service DEVE buscar transações onde o usuário é o AUTOR.
-    
-    return $this->repository->model()
-        // O relacionamento 'autor' ou o campo 'id_user_autor' deve ser usado
-        ->where('id_user_autor', $userId) 
-        // Adicionamos um OR para buscar transações onde ele é o aprovador, se necessário
-        ->orWhere('id_aprovador', $userId)
-        ->with(['carteira', 'autor']) // Eager Loading R4
-        ->orderBy('created_at', 'desc')
-        ->get(); // Usar get() em vez de findOrFail() para evitar erro 404/400 se não houver transações.
-}
-
-    // Busca transações relacionadas a uma cantina específica
-    public function getTransacoesByCanteenId(string $cantinaId)
     {
+        return $this->repository->model()
+            // Busca transações onde o usuário é o AUTOR OU O APROVADOR
+            ->where('id_user_autor', $userId) 
+            ->orWhere('id_aprovador', $userId)
+            ->with(['carteira', 'autor']) 
+            ->orderBy('created_at', 'desc')
+            ->get(); // Não usamos findOrFail para permitir listas vazias
+    }
+
+    /**
+     * CRÍTICO R18: Método renomeado para convenção correta.
+     */
+    public function getTransactionsByCanteenId(string $cantinaId)
+    {
+        // R18/R7: Assumindo que o Repositório implementa a lógica complexa de busca (ex: JOIN com Pedidos/Cantina)
         return $this->repository->getByCanteenId($cantinaId);
     }
 }
