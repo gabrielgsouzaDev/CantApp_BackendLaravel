@@ -3,7 +3,9 @@
 namespace App\Repositories;
 
 use App\Models\Pedido;
-use Illuminate\Support\Facades\DB; // Necessário para transações
+use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+// CRÍTICO R7: Removida a injeção de Illuminate\Support\Facades\DB, pois o Service é quem inicia a transação.
 
 class PedidoRepository
 {
@@ -14,28 +16,43 @@ class PedidoRepository
         $this->model = $model;
     }
 
-    // --- Métodos de Leitura Padrão ---
+    // --- Métodos de Leitura Padrão (Eager Loading) ---
 
+    /**
+     * @return Collection|Pedido[]
+     */
     public function all()
     {
-        // Garante que todas as relações importantes sejam carregadas
+        // R4: Eager Loading para evitar N+1
         return $this->model->with(['cantina', 'comprador', 'destinatario', 'itens.produto'])
                            ->orderBy('created_at', 'desc')
                            ->get();
     }
 
+    /**
+     * @throws ModelNotFoundException
+     * @return Pedido
+     */
     public function find($id)
     {
-        // Garante que todas as relações importantes sejam carregadas
+        // R4: Eager Loading
         return $this->model->with(['cantina', 'comprador', 'destinatario', 'itens.produto'])
-                           ->findOrFail($id); // Usamos findOrFail para lançar 404 se não encontrado
+                           ->findOrFail($id);
+    }
+    
+    // CRÍTICO R9/R8: Método de busca com Lock Pessimista para uso no PedidoService (fluxo de estorno)
+    public function findWithLock($id)
+    {
+        // Busca o pedido, incluindo os itens (necessário para o estorno de estoque)
+        return $this->model->with(['itens'])
+                           ->where($this->model->getKeyName(), $id) // Usa getKeyName() para compatibilidade (ex: 'id_pedido')
+                           ->lockForUpdate() // CRÍTICO: Aplica o Lock
+                           ->firstOrFail();
     }
 
-    // --- Métodos de Leitura Específicos ---
-    
-    // NOVO: Busca pedidos por ID do Comprador ou Destinatário (para Aluno/Pai)
     public function getByComprador(string $userId)
     {
+        // R4: Eager Loading
         return $this->model->where('id_comprador', $userId)
                            ->orWhere('id_destinatario', $userId)
                            ->with(['cantina', 'comprador', 'destinatario', 'itens.produto'])
@@ -43,69 +60,70 @@ class PedidoRepository
                            ->get();
     }
     
-    // NOVO: Busca pedidos por ID da Cantina (para Cantineiro)
     public function getByCantina(string $cantinaId)
     {
+        // R4: Otimização: Eager Loading sem o relacionamento 'cantina'
         return $this->model->where('id_cantina', $cantinaId)
-                           ->with(['comprador', 'destinatario', 'itens.produto']) // Não precisa de cantina aqui, já sabemos qual é
+                           ->with(['comprador', 'destinatario', 'itens.produto'])
                            ->orderBy('created_at', 'desc')
                            ->get();
     }
 
-    // --- Métodos de Escrita Padrão ---
+    // --- Métodos de Escrita ---
 
-    // CORRIGIDO/EXPANDIDO: Agora lida com a criação do Pedido e dos Itens do Pedido em uma Transação
+    /**
+     * CRÍTICO R7: Criação do Pedido e Itens. Removido DB::transaction aninhado.
+     * Assume que o Service já iniciou a transação.
+     * @return Pedido
+     */
     public function createOrderWithItems(array $data)
     {
-        // Garante que tanto o Pedido quanto seus Itens sejam criados ou nenhum seja.
-        return DB::transaction(function () use ($data) {
-            
-            $itemsData = $data['items'];
-            unset($data['items']); // Remove os itens antes de criar o Pedido principal
+        $itemsData = $data['items'];
+        unset($data['items']); 
 
-            // 1. Cria o Pedido principal
-            $pedido = $this->model->create($data);
+        // 1. Cria o Pedido principal
+        $pedido = $this->model->create($data);
 
-            // 2. Cria os Itens do Pedido (usando o relacionamento 'itens' definido no Model Pedido)
-            $itensToCreate = collect($itemsData)->map(function ($item) {
-                return [
-                    'id_produto' => $item['productId'],
-                    'quantidade' => $item['quantity'],
-                    // CORREÇÃO CRÍTICA (422 FIX): Usando 'preco_unitario' (coluna real do DB)
-                    'preco_unitario' => $item['unitPrice'], 
-                ];
-            })->all();
-            
-            $pedido->itens()->createMany($itensToCreate);
+        // 2. Formata e cria os Itens do Pedido (R7)
+        $itensToCreate = collect($itemsData)->map(function ($item) {
+            return [
+                'id_produto' => $item['productId'],
+                'quantidade' => $item['quantity'],
+                'preco_unitario' => $item['unitPrice'], // CRÍTICO: Nome de coluna real
+            ];
+        })->all();
+        
+        $pedido->itens()->createMany($itensToCreate);
 
-            // Retorna o Pedido completo com os itens
-            return $pedido->load(['itens.produto']);
-        });
+        // Retorna o Pedido completo com os itens
+        return $pedido->load(['itens.produto']);
     }
-
-    // Método Padrão de Criação (mantido, mas pode ser desnecessário se createOrderWithItems for o único usado)
+    
     public function create(array $data)
     {
+        // R3: Assume $fillable seguro no Model
         return $this->model->create($data);
     }
     
-    // NOVO: Método dedicado para atualização de status
+    /**
+     * CRÍTICO R7: Atualiza o status de um pedido. Removido DB::transaction aninhado.
+     * Deve ser chamado DENTRO de uma transação superior.
+     * @return Pedido
+     */
     public function updateStatus($id, string $status)
     {
-        return DB::transaction(function () use ($id, $status) {
-            $pedido = $this->model->findOrFail($id);
-            $pedido->status = $status;
-            $pedido->save();
-            return $pedido;
-        });
+        $pedido = $this->model->findOrFail($id);
+        $pedido->status = $status;
+        $pedido->save();
+        return $pedido; 
     }
 
     public function update($id, array $data)
     {
+        // R3: Assume que o Controller enviará APENAS campos seguros (fillable/guarded).
         $pedido = $this->model->find($id);
         if ($pedido) {
             $pedido->update($data);
-            // Retorna o objeto atualizado
             return $pedido->fresh(); 
         }
         return null;
@@ -115,9 +133,8 @@ class PedidoRepository
     {
         $pedido = $this->model->find($id);
         if ($pedido) {
-            // 🚨 IMPORTANTE: Se o PedidoModel não tiver 'cascade on delete',
-            // você deve deletar os itens do pedido primeiro aqui.
-            // $pedido->itens()->delete();
+            // CRÍTICO R5: Excluir itens primeiro (se 'onDelete(cascade)' não estiver na migration)
+            $pedido->itens()->delete();
             return $pedido->delete();
         }
         return false;
