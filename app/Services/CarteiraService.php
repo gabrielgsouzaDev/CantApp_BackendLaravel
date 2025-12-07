@@ -56,9 +56,9 @@ class CarteiraService
 
             // 4. Registro da Transação (R10)
             Transacao::create([
-                'id_carteira' => $carteira->id_carteira, 
-                'id_user_autor' => $userId, 
-                'id_aprovador' => null,
+                'id_carteira' => (string) $carteira->id_carteira, 
+                'id_user_autor' => (string) $userId, 
+                'id_aprovador' => (string) $userId, // CORRIGIDO: Assume que o autor é o aprovador do próprio débito/pedido.
                 'uuid' => (string) Str::uuid(),
                 'tipo' => 'DEBITO',
                 'valor' => $amount,
@@ -97,15 +97,15 @@ class CarteiraService
 
             // 3. Registro da Transação (R10)
             Transacao::create([
-                // CRÍTICO R24: Garantir que IDs sejam strings (ou o tipo que o DB espera)
                 'id_carteira' => (string) $carteira->id_carteira, 
-                'id_user_autor' => (string) $userId, // <-- CORREÇÃO: Cast para string
-                'id_aprovador' => null, // Assumindo que é nullable no DB
+                'id_user_autor' => (string) $userId, 
+                // CRÍTICO R24: Assume que o aprovador não pode ser NULL.
+                'id_aprovador' => (string) $userId, // <-- CORREÇÃO: Usa o próprio autor como aprovador da recarga.
                 'uuid' => (string) Str::uuid(),
                 'tipo' => 'CREDITO', 
                 'valor' => $amount,
                 'descricao' => $descricao,
-                'referencia' => $referenciaId, // Mantido como string|null
+                'referencia' => $referenciaId, 
                 'status' => 'concluida', 
             ]);
 
