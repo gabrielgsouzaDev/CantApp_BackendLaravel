@@ -153,15 +153,16 @@ class CarteiraController extends Controller
         $referenciaId = $request->input('referencia_id', null);
 
         try {
-            // 2. DELEGAÇÃO: O Service faz a transação ATÔMICA (R22).
-            $carteira = $this->service->credit($userId, $valorRecarga, $descricao, $referenciaId);
+        // 2. DELEGAÇÃO: O Service deve retornar a Transação criada
+        [$carteira, $transacao] = $this->service->credit($userId, $valorRecarga, $descricao, $referenciaId); // Assumindo que o Service retorna um array
 
-            // 3. Resposta de Sucesso (200 OK)
-            return response()->json([
-                'message' => 'Recarga realizada com sucesso.',
-                'saldo_atual' => $carteira->saldo,
-                'carteira' => $carteira->load('user'), 
-            ], 200);
+        // 3. Resposta de Sucesso: Retornar a Transação completa
+        return response()->json([
+        'message' => 'Recarga realizada com sucesso.',
+        'saldo_atual' => $carteira->saldo,
+        'carteira' => $carteira->load('user'), 
+        'transacao' => $transacao, // <--- EXPOR A TRANSAÇÃO AQUI
+        ], 200);
 
         } catch (Exception $e) {
             // 4. Tratamento de Erro (Log)
