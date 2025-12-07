@@ -20,23 +20,25 @@ class CarteiraService
     
     /**
      * Método para checagem rápida (UX).
-     * CRÍTICO R36: Implementa bccomp para evitar erros de ponto flutuante.
+     * CRÍTICO R36: Usa comparação por centavos (inteiros) para precisão.
      */
     public function hasSufficientBalance(int $userId, float $amount): bool
     {
         $carteira = $this->repository->findByUserId($userId); 
         
-        // Retorna TRUE se o saldo for maior ou igual (>= 0) ao valor requerido.
-        return $carteira && bccomp($carteira->saldo, $amount, 2) >= 0;
+        if (!$carteira) {
+            return false;
+        }
+
+        // Converte valores para centavos (inteiros) para comparação segura
+        $saldoCentavos = (int) round($carteira->saldo * 100);
+        $amountCentavos = (int) round($amount * 100);
+        
+        return $saldoCentavos >= $amountCentavos;
     }
 
     /**
      * Processa um débito na carteira do usuário de forma ATÔMICA. 
-     * @param int $userId ID do usuário.
-     * @param float $amount Valor a ser debitado.
-     * @param string $descricao Descrição da transação.
-     * @param string|null $referenciaId ID do Pedido ou outra referência (R10).
-     * @throws SaldoInsuficienteException Se o saldo for menor que o valor (R9).
      */
     public function debit(int $userId, float $amount, string $descricao = 'Pagamento de Pedido', ?string $referenciaId = null): array
     {
@@ -51,18 +53,23 @@ class CarteiraService
             }
             
             // 2. Verifica Saldo DENTRO do lock
-            // CRÍTICO R36: Usa bccomp para checagem precisa (retorna -1 se saldo < amount).
-            if (bccomp($carteira->saldo, $amount, 2) === -1) { 
+            // CRÍTICO R36: Checagem por centavos
+            $saldoCentavos = (int) round($carteira->saldo * 100);
+            $amountCentavos = (int) round($amount * 100);
+            
+            if ($saldoCentavos < $amountCentavos) { 
                 throw new SaldoInsuficienteException("Saldo insuficiente na carteira para o débito.");
             }
             
             // 3. Executa o Débito
-            // CRÍTICO R36: Usa bcsub para subtrair com precisão de 2 casas decimais.
-            $carteira->saldo = bcsub($carteira->saldo, $amount, 2);
+            // CRÍTICO R36: Executa a subtração e formata de volta para float/decimal (mantendo precisão)
+            $novoSaldoCentavos = $saldoCentavos - $amountCentavos;
+            $carteira->saldo = $novoSaldoCentavos / 100.00; // Salva como float (o Model cuida do cast para DB)
+
             $this->repository->save($carteira);
 
             // 4. Registro da Transação (R10)
-            $transacao = Transacao::create([ // CRÍTICO: Capture a Transação
+            $transacao = Transacao::create([
                 'id_carteira' => (int) $carteira->id_carteira, 
                 'id_user_autor' => $userId > 0 ? (int) $userId : null, 
                 'id_aprovador' => $userId > 0 ? (int) $userId : null, 
@@ -74,17 +81,12 @@ class CarteiraService
                 'status' => 'concluida', 
             ]);
 
-            return [$carteira, $transacao]; // CRÍTICO R31: Retorna ambos os objetos
+            return [$carteira, $transacao]; 
         }); 
     }
 
     /**
      * Processa um crédito na carteira do usuário de forma ATÔMICA. 
-     * @param int $userId ID do usuário.
-     * @param float $amount Valor a ser creditado.
-     * @param string $descricao Descrição da transação.
-     * @param string|null $referenciaId ID do Pedido ou outra referência (R10).
-     * @return array [Carteira, Transacao]
      */
     public function credit(int $userId, float $amount, string $descricao = 'Recarga/Estorno', ?string $referenciaId = null): array
     {
@@ -99,8 +101,13 @@ class CarteiraService
             }
 
             // 2. Executa o Crédito
-            // CRÍTICO R36: Usa bcadd para somar com precisão de 2 casas decimais.
-            $carteira->saldo = bcadd($carteira->saldo, $amount, 2);
+            // CRÍTICO R36: Usa aritmética de inteiros (centavos) para precisão.
+            $saldoCentavos = (int) round($carteira->saldo * 100);
+            $amountCentavos = (int) round($amount * 100);
+            
+            $novoSaldoCentavos = $saldoCentavos + $amountCentavos;
+            $carteira->saldo = $novoSaldoCentavos / 100.00; // Salva como float
+            
             $this->repository->save($carteira);
 
             // 3. Registro da Transação (R10)
@@ -116,7 +123,7 @@ class CarteiraService
                 'status' => 'confirmada', 
             ]);
 
-            return [$carteira, $transacao]; // CRÍTICO R31: Retorna ambos os objetos
+            return [$carteira, $transacao];
         });
     }
 }
