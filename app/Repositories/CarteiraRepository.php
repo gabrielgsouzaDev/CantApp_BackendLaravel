@@ -3,8 +3,10 @@
 namespace App\Repositories;
 
 use App\Models\Carteira;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\QueryException; // Adicionado para defesa extra
 use Exception;
+use Log; // Adicionado para logging em caso de falha de query
 
 class CarteiraRepository
 {
@@ -28,19 +30,30 @@ class CarteiraRepository
      *
      * @param int $userId
      * @return \App\Models\Carteira|null
+     * @throws Exception
      */
     public function findByUserIdForUpdate(int $userId): ?Carteira
     {
-        // CRÍTICO R9/R23: Combina a busca e o bloqueio em UMA única consulta.
-        // O Laravel garante o bloqueio apenas se a consulta for executada dentro de uma transação.
         try {
+             // CRÍTICO R9/R23: Combina a busca e o bloqueio em UMA única consulta.
              return $this->model
                          ->where('id_user', $userId)
                          ->lockForUpdate() // Aplica o bloqueio pessimista na busca
-                         ->firstOrFail(); // Usa findOrFail para lançar exceção se não encontrar (tratada no Service)
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            // Lança uma exceção genérica para o Service tratar se a carteira não existir
-            throw new Exception("Carteira do usuário (ID: {$userId}) não encontrada.");
+                         ->firstOrFail(); // Lança ModelNotFoundException
+                         
+        } catch (ModelNotFoundException $e) {
+            // R25: Trata a exceção de registro não encontrado
+            throw new Exception("Carteira do usuário (ID: {$userId}) não encontrada.", 0, $e);
+            
+        } catch (QueryException $e) {
+            // R25: TRATAMENTO CRÍTICO: Captura falhas de SQL (tabela/coluna errada)
+            Log::error("QueryException no Repositório (findByUserIdForUpdate): " . $e->getMessage());
+            throw new Exception("Falha de comunicação com o banco de dados durante o bloqueio da carteira.", 0, $e);
+
+        } catch (Exception $e) {
+             // R25: Captura qualquer outra falha genérica
+             Log::error("Erro Desconhecido no Repositório: " . $e->getMessage());
+             throw new Exception("Erro interno inesperado ao buscar carteira.", 0, $e);
         }
     }
     
@@ -59,6 +72,12 @@ class CarteiraRepository
      */
     public function save(Carteira $carteira): bool
     {
-        return $carteira->save();
+        // R25: Esta operação também deve ser defensiva, pois um erro aqui causa o rollback
+        try {
+            return $carteira->save();
+        } catch (QueryException $e) {
+            Log::error("QueryException no Repositório (save): " . $e->getMessage());
+            throw new Exception("Falha ao salvar o novo saldo da carteira.", 0, $e);
+        }
     }
 }
