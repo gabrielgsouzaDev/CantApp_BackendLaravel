@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\CantinaService;
-use App\Models\Cantina;
+use App\Models\Cantina; // CRÍTICO R51: Import da Model para o método index
 
 class CantinaController extends Controller
 {
@@ -12,14 +12,17 @@ class CantinaController extends Controller
 
     public function __construct(CantinaService $service)
     {
+        // NOTA: O middleware de autenticação deve ser definido nas rotas,
+        // mas você pode adicioná-lo aqui se quiser proteger todo o Controller.
+        // Ex: $this->middleware('auth:sanctum')->except(['index', 'show']);
+        
         $this->service = $service;
     }
 
     // Listar todas as cantinas
     public function index()
     {
-    // A Policy 'viewAny' não deve ser chamada aqui se a rota for pública.
-    // O ideal é que o Controller retorne todas as cantinas ativas para listagem de cadastro.
+    // A chamada direta à Model agora funciona devido ao import acima.
     $cantinas = Cantina::where('status', 'ativa')->get(); 
     return response()->json(['data' => $cantinas]);
     }

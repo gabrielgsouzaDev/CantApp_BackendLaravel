@@ -5,42 +5,51 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Cantina extends Model
+// CRÍTICO: Modelos relacionados devem ser importados para funcionar, mesmo que não seja a causa do erro 500 atual.
+use App\Models\User;
+use App\Models\Transacao;
+
+class Carteira extends Model
 {
     use HasFactory;
 
-    protected $table = 'tb_cantina';
-    protected $primaryKey = 'id_cantina';
+    // R7: Viola a convenção ('carteiras'), mas mantido para compatibilidade com o DB.
+    protected $table = 'tb_carteira';
+    
+    // R7: Viola a convenção ('id'), mas mantido para compatibilidade com o DB.
+    protected $primaryKey = 'id_carteira';
     public $timestamps = true;
 
     protected $fillable = [
-        'nome',
-        'id_escola',
-        'hr_abertura',
-        'hr_fechamento'
+        'id_user', 
+        'saldo',
+        'saldo_bloqueado',
+        'limite_recarregar',
+        'limite_maximo_saldo'
     ];
 
-    // Relações
-    public function escola()
+    // R6: Cuidado! O cast 'decimal' ainda usa float para leitura. 
+    // Foi corrigido para o MVP usar aritmética de inteiros no Service.
+    protected $casts = [
+        'saldo' => 'decimal:2',
+        'saldo_bloqueado' => 'decimal:2',
+        'limite_recarregar' => 'decimal:2',
+        'limite_maximo_saldo' => 'decimal:2'
+    ];
+
+    /**
+     * R7: Relacionamento com Usuário.
+     */
+    public function user()
     {
-        return $this->belongsTo(Escola::class, 'id_escola', 'id_escola');
+        return $this->belongsTo(User::class, 'id_user', 'id');
     }
 
-    public function produtos()
+    /**
+     * R7: Relacionamento com Transações.
+     */
+    public function transacoes()
     {
-        return $this->hasMany(Produto::class, 'id_cantina', 'id_cantina');
-    }
-
-    public function pedidos()
-    {
-        return $this->hasMany(Pedido::class, 'id_cantina', 'id_cantina');
-    }
-
-    public function usuarios()
-    {
-        return $this->hasMany(User::class, 'id_cantina', 'id_cantina')
-                    ->whereHas('roles', function($q){
-                        $q->where('nome_role','Cantina');
-                    });
+        return $this->hasMany(Transacao::class, 'id_carteira', 'id_carteira');
     }
 }
