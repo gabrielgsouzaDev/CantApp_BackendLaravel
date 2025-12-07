@@ -71,4 +71,16 @@ class EstoqueService
 
         return $estoque;
     }
+
+    public function findByProductIdForUpdate(int $productId): Estoque
+    {
+        try {
+             return $this->model
+                         ->where('id_produto', $productId)
+                         ->lockForUpdate() // Aplica o bloqueio pessimista
+                         ->firstOrFail(); // Lança ModelNotFoundException se não encontrado
+        } catch (ModelNotFoundException $e) {
+            throw new Exception("Estoque do produto (ID: {$productId}) não encontrado.");
+        }
+    }
 }
