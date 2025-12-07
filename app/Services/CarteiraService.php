@@ -97,11 +97,11 @@ class CarteiraService
 
             // 3. Registro da Transação (R10)
         Transacao::create([
-            'id_carteira' => (string) $carteira->id_carteira, 
-            'id_user_autor' => (string) $userId, 
+            'id_carteira' => (int) $carteira->id_carteira, 
+            'id_user_autor' => (int) $userId, 
             // CRÍTICO: Se o campo for NOT NULL no DB, ele deve ter um valor.
             // Usar o ID do autor, garantido a string.
-            'id_aprovador' => (string) $userId, 
+           'id_aprovador' => (int) $userId, 
             'uuid' => (string) Str::uuid(),
             'tipo' => 'CREDITO', 
             'valor' => $amount,

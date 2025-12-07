@@ -46,4 +46,19 @@ class ProdutoRepository
         }
         return false;
     }
+
+    /**
+     * CRÍTICO R20: Adiciona o método necessário para buscar produtos por Cantina.
+     * Assume que a chave estrangeira é 'id_cantina' no modelo Produto.
+     * @param string $cantinaId
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getByCantina(string $cantinaId)
+    {
+        return $this->model
+            ->where('id_cantina', $cantinaId)
+            ->with(['cantina', 'estoque']) // Carrega dados essenciais para o frontend
+            ->orderBy('nome', 'asc')
+            ->get();
+    }
 }
