@@ -33,7 +33,7 @@ class CarteiraService
      * @param string|null $referenciaId ID do Pedido ou outra referência (R10).
      * @throws SaldoInsuficienteException Se o saldo for menor que o valor (R9).
      */
-    public function debit(int $userId, float $amount, string $descricao = 'Pagamento de Pedido', ?string $referenciaId = null): \App\Models\Carteira
+    public function debit(int $userId, float $amount, string $descricao = 'Pagamento de Pedido', ?string $referenciaId = null): array
     {
         // CRÍTICO R22: Inicia a Transação Atômica
         return DB::transaction(function () use ($userId, $amount, $descricao, $referenciaId) {
@@ -55,19 +55,19 @@ class CarteiraService
             $this->repository->save($carteira);
 
             // 4. Registro da Transação (R10)
-            Transacao::create([
-                'id_carteira' => (string) $carteira->id_carteira, 
-                'id_user_autor' => (string) $userId, 
-                'id_aprovador' => (string) $userId, // CORRIGIDO: Assume que o autor é o aprovador do próprio débito/pedido.
+            $transacao = Transacao::create([ // CRÍTICO: Capture a Transação
+                'id_carteira' => (int) $carteira->id_carteira, 
+                'id_user_autor' => $userId > 0 ? (int) $userId : null, 
+                'id_aprovador' => $userId > 0 ? (int) $userId : null, 
                 'uuid' => (string) Str::uuid(),
-                'tipo' => 'DEBITO',
+                'tipo' => 'Debito', // Alinhado com o ENUM da Migration
                 'valor' => $amount,
                 'descricao' => $descricao,
                 'referencia' => $referenciaId, 
                 'status' => 'concluida', 
             ]);
 
-            return $carteira;
+            return [$carteira, $transacao]; // CRÍTICO R31: Retorna ambos os objetos
         }); 
     }
 
@@ -77,8 +77,9 @@ class CarteiraService
      * @param float $amount Valor a ser creditado.
      * @param string $descricao Descrição da transação.
      * @param string|null $referenciaId ID do Pedido ou outra referência (R10).
+     * @return array [Carteira, Transacao]
      */
-    public function credit(int $userId, float $amount, string $descricao = 'Recarga/Estorno', ?string $referenciaId = null): \App\Models\Carteira
+    public function credit(int $userId, float $amount, string $descricao = 'Recarga/Estorno', ?string $referenciaId = null): array
     {
         // CRÍTICO R22: Inicia a Transação Atômica
         return DB::transaction(function () use ($userId, $amount, $descricao, $referenciaId) {
@@ -87,7 +88,6 @@ class CarteiraService
             $carteira = $this->repository->findByUserIdForUpdate($userId); 
             
             if (!$carteira) {
-                // R9: Se não encontrar, lança exceção para reverter a transação
                 throw new Exception("Carteira do usuário não encontrada (ID: {$userId}).");
             }
 
@@ -96,22 +96,23 @@ class CarteiraService
             $this->repository->save($carteira);
 
             // 3. Registro da Transação (R10)
-        Transacao::create([
-                // CRÍTICO R24: Garantia de Cast para INT
+            $transacao = Transacao::create([ // CRÍTICO: Capture a Transação
+                // R24: Garantia de Cast para INT
                 'id_carteira' => (int) $carteira->id_carteira, 
-            'id_user_autor' => $userId > 0 ? (int) $userId : null, // Garante que 0 não seja inserido se a FK for estrita
-            'id_aprovador' => $userId > 0 ? (int) $userId : null, // Mesma lógica para aprovador
+                'id_user_autor' => $userId > 0 ? (int) $userId : null, 
+                'id_aprovador' => $userId > 0 ? (int) $userId : null, 
                 'uuid' => (string) Str::uuid(),
+                
+                // CRÍTICO R28: Alinha o valor com o ENUM da Migration
                 'tipo' => 'Recarregar', 
+                
                 'valor' => $amount,
                 'descricao' => $descricao,
-                // CRÍTICO R24: SOLUÇÃO FINAL: Se o Front-end não envia, DEVE ser NULL (pois a migration é nullable).
-                // O operador ?? 'Sem Referencia' deve ser removido.
-                'referencia' => $referenciaId, // <-- CORREÇÃO: Passa NULL se for NULL.
-                'status' => 'concluida',
+                'referencia' => $referenciaId, 
+                'status' => 'confirmada', // Status ajustado para 'confirmada' conforme ENUM
             ]);
 
-            return $carteira;
+            return [$carteira, $transacao]; // CRÍTICO R31: Retorna ambos os objetos
         });
     }
     
