@@ -17,8 +17,10 @@ class CantinaController extends Controller
     // Listar todas as cantinas
     public function index()
     {
-        $cantinas = $this->service->all();
-        return response()->json(['data' => $cantinas]);
+    // A Policy 'viewAny' não deve ser chamada aqui se a rota for pública.
+    // O ideal é que o Controller retorne todas as cantinas ativas para listagem de cadastro.
+    $cantinas = Cantina::where('status', 'ativa')->get(); 
+    return response()->json(['data' => $cantinas]);
     }
 
     // Mostrar uma cantina específica
