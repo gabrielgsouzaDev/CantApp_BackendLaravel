@@ -87,6 +87,7 @@ class CarteiraService
             $carteira = $this->repository->findByUserIdForUpdate($userId); 
             
             if (!$carteira) {
+                // R9: Se não encontrar, lança exceção para reverter a transação
                 throw new Exception("Carteira do usuário não encontrada (ID: {$userId}).");
             }
 
@@ -96,14 +97,15 @@ class CarteiraService
 
             // 3. Registro da Transação (R10)
             Transacao::create([
-                'id_carteira' => $carteira->id_carteira, 
-                'id_user_autor' => $userId, 
-                'id_aprovador' => null, 
+                // CRÍTICO R24: Garantir que IDs sejam strings (ou o tipo que o DB espera)
+                'id_carteira' => (string) $carteira->id_carteira, 
+                'id_user_autor' => (string) $userId, // <-- CORREÇÃO: Cast para string
+                'id_aprovador' => null, // Assumindo que é nullable no DB
                 'uuid' => (string) Str::uuid(),
                 'tipo' => 'CREDITO', 
                 'valor' => $amount,
                 'descricao' => $descricao,
-                'referencia' => $referenciaId, 
+                'referencia' => $referenciaId, // Mantido como string|null
                 'status' => 'concluida', 
             ]);
 
