@@ -5,51 +5,56 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-// CRÍTICO: Modelos relacionados devem ser importados para funcionar, mesmo que não seja a causa do erro 500 atual.
-use App\Models\User;
-use App\Models\Transacao;
+// CRÍTICO R51: Adicionar todas as Models relacionadas que estão faltando
+use App\Models\Escola; 
+use App\Models\Produto; 
+use App\Models\Pedido; 
+use App\Models\User; 
+// Dependendo da sua estrutura, você pode precisar importar também a Model Role
+// se ela não estiver na mesma pasta 'Models' que User.
+use App\Models\Role; 
 
-class Carteira extends Model
+class Cantina extends Model
 {
     use HasFactory;
 
-    // R7: Viola a convenção ('carteiras'), mas mantido para compatibilidade com o DB.
-    protected $table = 'tb_carteira';
-    
-    // R7: Viola a convenção ('id'), mas mantido para compatibilidade com o DB.
-    protected $primaryKey = 'id_carteira';
+    protected $table = 'tb_cantina';
+    protected $primaryKey = 'id_cantina';
     public $timestamps = true;
 
     protected $fillable = [
-        'id_user', 
-        'saldo',
-        'saldo_bloqueado',
-        'limite_recarregar',
-        'limite_maximo_saldo'
+        'nome',
+        'id_escola',
+        'hr_abertura',
+        'hr_fechamento'
     ];
 
-    // R6: Cuidado! O cast 'decimal' ainda usa float para leitura. 
-    // Foi corrigido para o MVP usar aritmética de inteiros no Service.
-    protected $casts = [
-        'saldo' => 'decimal:2',
-        'saldo_bloqueado' => 'decimal:2',
-        'limite_recarregar' => 'decimal:2',
-        'limite_maximo_saldo' => 'decimal:2'
-    ];
-
-    /**
-     * R7: Relacionamento com Usuário.
-     */
-    public function user()
+    // Relações
+    public function escola()
     {
-        return $this->belongsTo(User::class, 'id_user', 'id');
+        // Agora o Laravel consegue resolver Escola::class
+        return $this->belongsTo(Escola::class, 'id_escola', 'id_escola');
     }
 
-    /**
-     * R7: Relacionamento com Transações.
-     */
-    public function transacoes()
+    public function produtos()
     {
-        return $this->hasMany(Transacao::class, 'id_carteira', 'id_carteira');
+        // Agora o Laravel consegue resolver Produto::class
+        return $this->hasMany(Produto::class, 'id_cantina', 'id_cantina');
+    }
+
+    public function pedidos()
+    {
+        // Agora o Laravel consegue resolver Pedido::class
+        return $this->hasMany(Pedido::class, 'id_cantina', 'id_cantina');
+    }
+
+    public function usuarios()
+    {
+        return $this->hasMany(User::class, 'id_cantina', 'id_cantina')
+            // O filtro 'Cantina' é o correto, conforme confirmado.
+            ->whereHas('roles', function($q){
+                // Agora o Laravel consegue resolver o relacionamento 'roles'
+                $q->where('nome_role','Cantina'); 
+            });
     }
 }
