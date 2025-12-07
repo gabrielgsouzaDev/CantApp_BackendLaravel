@@ -99,8 +99,8 @@ class CarteiraService
 Transacao::create([
                 // CRÍTICO R24: Garantia de Cast para INT
                 'id_carteira' => (int) $carteira->id_carteira, 
-                'id_user_autor' => (int) $userId, 
-                'id_aprovador' => (int) $userId, 
+            'id_user_autor' => $userId > 0 ? (int) $userId : null, // Garante que 0 não seja inserido se a FK for estrita
+            'id_aprovador' => $userId > 0 ? (int) $userId : null, // Mesma lógica para aprovador
                 'uuid' => (string) Str::uuid(),
                 'tipo' => 'CREDITO', 
                 'valor' => $amount,
