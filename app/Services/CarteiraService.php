@@ -18,11 +18,16 @@ class CarteiraService
         $this->repository = $repository;
     }
     
-    // Método para checagem rápida (UX) - Não seguro por si só, apenas para UX/Controller.
+    /**
+     * Método para checagem rápida (UX).
+     * CRÍTICO R36: Implementa bccomp para evitar erros de ponto flutuante.
+     */
     public function hasSufficientBalance(int $userId, float $amount): bool
     {
         $carteira = $this->repository->findByUserId($userId); 
-        return $carteira && $carteira->saldo >= $amount;
+        
+        // Retorna TRUE se o saldo for maior ou igual (>= 0) ao valor requerido.
+        return $carteira && bccomp($carteira->saldo, $amount, 2) >= 0;
     }
 
     /**
@@ -46,12 +51,14 @@ class CarteiraService
             }
             
             // 2. Verifica Saldo DENTRO do lock
-            if ($carteira->saldo < $amount) {
+            // CRÍTICO R36: Usa bccomp para checagem precisa (retorna -1 se saldo < amount).
+            if (bccomp($carteira->saldo, $amount, 2) === -1) { 
                 throw new SaldoInsuficienteException("Saldo insuficiente na carteira para o débito.");
             }
             
             // 3. Executa o Débito
-            $carteira->saldo -= $amount;
+            // CRÍTICO R36: Usa bcsub para subtrair com precisão de 2 casas decimais.
+            $carteira->saldo = bcsub($carteira->saldo, $amount, 2);
             $this->repository->save($carteira);
 
             // 4. Registro da Transação (R10)
@@ -60,7 +67,7 @@ class CarteiraService
                 'id_user_autor' => $userId > 0 ? (int) $userId : null, 
                 'id_aprovador' => $userId > 0 ? (int) $userId : null, 
                 'uuid' => (string) Str::uuid(),
-                'tipo' => 'Debito', // Alinhado com o ENUM da Migration
+                'tipo' => 'Debito', 
                 'valor' => $amount,
                 'descricao' => $descricao,
                 'referencia' => $referenciaId, 
@@ -92,30 +99,24 @@ class CarteiraService
             }
 
             // 2. Executa o Crédito
-            $carteira->saldo += $amount;
+            // CRÍTICO R36: Usa bcadd para somar com precisão de 2 casas decimais.
+            $carteira->saldo = bcadd($carteira->saldo, $amount, 2);
             $this->repository->save($carteira);
 
             // 3. Registro da Transação (R10)
-            $transacao = Transacao::create([ // CRÍTICO: Capture a Transação
-                // R24: Garantia de Cast para INT
+            $transacao = Transacao::create([ 
                 'id_carteira' => (int) $carteira->id_carteira, 
                 'id_user_autor' => $userId > 0 ? (int) $userId : null, 
                 'id_aprovador' => $userId > 0 ? (int) $userId : null, 
                 'uuid' => (string) Str::uuid(),
-                
-                // CRÍTICO R28: Alinha o valor com o ENUM da Migration
                 'tipo' => 'Recarregar', 
-                
                 'valor' => $amount,
                 'descricao' => $descricao,
                 'referencia' => $referenciaId, 
-                'status' => 'confirmada', // Status ajustado para 'confirmada' conforme ENUM
+                'status' => 'confirmada', 
             ]);
 
             return [$carteira, $transacao]; // CRÍTICO R31: Retorna ambos os objetos
         });
     }
-    
-    // NOTA: Para que este Service funcione, os métodos findByUserIdForUpdate e save
-    // DEVE existir no seu CarteiraRepository.
 }
