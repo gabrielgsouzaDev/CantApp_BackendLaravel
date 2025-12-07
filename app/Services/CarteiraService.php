@@ -96,18 +96,20 @@ class CarteiraService
             $this->repository->save($carteira);
 
             // 3. Registro da Transação (R10)
-            Transacao::create([
-                'id_carteira' => (string) $carteira->id_carteira, 
-                'id_user_autor' => (string) $userId, 
-                // CRÍTICO R24: Assume que o aprovador não pode ser NULL.
-                'id_aprovador' => (string) $userId, // <-- CORREÇÃO: Usa o próprio autor como aprovador da recarga.
-                'uuid' => (string) Str::uuid(),
-                'tipo' => 'CREDITO', 
-                'valor' => $amount,
-                'descricao' => $descricao,
-                'referencia' => $referenciaId, 
-                'status' => 'concluida', 
-            ]);
+        Transacao::create([
+            'id_carteira' => (string) $carteira->id_carteira, 
+            'id_user_autor' => (string) $userId, 
+            // CRÍTICO: Se o campo for NOT NULL no DB, ele deve ter um valor.
+            // Usar o ID do autor, garantido a string.
+            'id_aprovador' => (string) $userId, 
+            'uuid' => (string) Str::uuid(),
+            'tipo' => 'CREDITO', 
+            'valor' => $amount,
+            'descricao' => $descricao,
+            // CRÍTICO R24: GARANTIR STRING VAZIA SE NULO
+            'referencia' => $referenciaId ?? '', // <-- CORREÇÃO: Usa string vazia se nulo
+            'status' => 'concluida', 
+        ]);
 
             return $carteira;
         });
