@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\CantinaService;
+use App\Models\Cantina;
 
 class CantinaController extends Controller
 {
