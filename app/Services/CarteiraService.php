@@ -96,13 +96,13 @@ class CarteiraService
             $this->repository->save($carteira);
 
             // 3. Registro da Transação (R10)
-Transacao::create([
+        Transacao::create([
                 // CRÍTICO R24: Garantia de Cast para INT
                 'id_carteira' => (int) $carteira->id_carteira, 
             'id_user_autor' => $userId > 0 ? (int) $userId : null, // Garante que 0 não seja inserido se a FK for estrita
             'id_aprovador' => $userId > 0 ? (int) $userId : null, // Mesma lógica para aprovador
                 'uuid' => (string) Str::uuid(),
-                'tipo' => 'CREDITO', 
+                'tipo' => 'Recarregar', 
                 'valor' => $amount,
                 'descricao' => $descricao,
                 // CRÍTICO R24: SOLUÇÃO FINAL: Se o Front-end não envia, DEVE ser NULL (pois a migration é nullable).
