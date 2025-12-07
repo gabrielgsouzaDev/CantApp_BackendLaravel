@@ -106,9 +106,9 @@ class CarteiraService
             'tipo' => 'CREDITO', 
             'valor' => $amount,
             'descricao' => $descricao,
-            // CRÍTICO R24: GARANTIR STRING VAZIA SE NULO
-            'referencia' => $referenciaId ?? '', // <-- CORREÇÃO: Usa string vazia se nulo
-            'status' => 'concluida', 
+            // CRÍTICO R24: Resolve o problema do campo ausente/nulo
+            'referencia' => $referenciaId ?? 'Sem Referencia', // Usa valor padrão se for NULL
+            'status' => 'concluida',
         ]);
 
             return $carteira;
