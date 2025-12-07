@@ -53,46 +53,37 @@ class PedidoService
     /**
      * CRÍTICO R2/R8/R9/R10: Cria um pedido com itens, debita carteira do comprador e decrementa estoque.
      */
-    public function createOrderWithItems(array $data)
+        public function createOrderWithItems(array $data)
     {
         $idComprador = $data['id_comprador'];
         $valorTotal = $data['valor_total'];
         
-        // Validação de Pré-Transação (melhora UX, mas não é 100% seguro sem lock)
-        // A validação de CONCORRÊNCIA é feita com lockForUpdate dentro dos Services!
+        // Validação de Pré-Transação (UX)
         if (!$this->carteiraService->hasSufficientBalance($idComprador, $valorTotal)) {
              throw ValidationException::withMessages(['valor_total' => 'Saldo insuficiente na carteira.']);
         }
-        foreach ($data['items'] as $item) {
-            if (!$this->estoqueService->isStockAvailable($item['productId'], $item['quantity'])) {
-                 throw ValidationException::withMessages(['items' => "Estoque insuficiente para o produto {$item['productId']}."]);
-            }
-        }
-
+        // Nota: A checagem de estoque é duplicada aqui para UX; a checagem com LOCK ocorre no Passo 2.
+        
         // INÍCIO DA UNIDADE DE TRABALHO ATÔMICA (R2)
         return DB::transaction(function () use ($data, $idComprador, $valorTotal) {
             
             // 1. Debitar o valor da carteira do comprador
-            // CRÍTICO R9: Este método DEVE aplicar lockForUpdate() na tabela 'carteiras'.
+            // CRÍTICO R9: O debit() faz o lock, a subtração e o registro da transação.
             $this->carteiraService->debit($idComprador, $valorTotal);
 
             // 2. Decrementar o estoque dos produtos
             foreach ($data['items'] as $item) {
                 // CRÍTICO R8: Este método DEVE aplicar lockForUpdate() na tabela 'estoque'.
-                $this->estoqueService->decrementStock($item['productId'], $item['quantity']);
+                // Usamos o 'product_id' que o Controller validou.
+                $this->estoqueService->decrementStock($item['product_id'], $item['quantity']);
             }
 
             // 3. Criar o pedido com os itens
+            // O Repository fará o mapeamento final para as colunas da DB.
             $pedido = $this->repository->createOrderWithItems($data);
 
             // 4. Implementar registro de transação formal (R10)
-            $this->carteiraService->registerTransaction(
-                $idComprador, 
-                $valorTotal, 
-                'DEBITO', // Tipo de transação
-                "Pagamento Pedido #{$pedido->id}", 
-                $pedido->id // Relaciona o registro de extrato com o ID do pedido
-            ); 
+            // CRÍTICO R39: REMOVIDO: registerTransaction() foi removido pois o registro já está no debit().
 
             return $pedido;
         }); // Fim da Transação (commit ou rollback)

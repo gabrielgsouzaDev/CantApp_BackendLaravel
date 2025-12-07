@@ -32,8 +32,7 @@ class EstoqueService
      */
     public function decrementStock(int $productId, int $quantity)
     {
-        // CRÍTICO R8: Busca e Bloqueio da linha (lockForUpdate)
-        // O Repository DEVE ter um método findByProductIdForUpdate que usa lockForUpdate()
+        // CRÍTICO R8: O Repository DEVE buscar e bloquear a linha (lockForUpdate)
         $estoque = $this->repository->findByProductIdForUpdate($productId); 
         
         if (!$estoque) {

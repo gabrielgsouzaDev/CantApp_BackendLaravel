@@ -84,14 +84,14 @@ class PedidoRepository
         // 1. Cria o Pedido principal
         $pedido = $this->model->create($data);
 
+        // 2. Formata e cria os Itens do Pedido (R7)
         $itensToCreate = collect($itemsData)->map(function ($item) {
-        return [
-        // CRÍTICO R38: Ajuste o mapeamento para as chaves reais da DB.
-        // O Front-end envia: product_id, quantity, unit_price
-        'id_produto' => $item['product_id'], // Chave do DB
-        'quantidade' => $item['quantity'],   // Chave do DB
-        'preco_unitario' => $item['unit_price'], // Chave do DB
-        ];
+            return [
+                // CRÍTICO R38: Mapeamento para as chaves corretas do payload do Controller
+                'id_produto' => $item['product_id'], 
+                'quantidade' => $item['quantity'],
+                'preco_unitario' => $item['unit_price'],
+            ];
         })->all();
         
         $pedido->itens()->createMany($itensToCreate);
