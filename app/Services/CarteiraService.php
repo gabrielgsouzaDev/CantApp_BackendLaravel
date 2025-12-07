@@ -96,20 +96,20 @@ class CarteiraService
             $this->repository->save($carteira);
 
             // 3. Registro da Transação (R10)
-        Transacao::create([
-            'id_carteira' => (int) $carteira->id_carteira, 
-            'id_user_autor' => (int) $userId, 
-            // CRÍTICO: Se o campo for NOT NULL no DB, ele deve ter um valor.
-            // Usar o ID do autor, garantido a string.
-           'id_aprovador' => (int) $userId, 
-            'uuid' => (string) Str::uuid(),
-            'tipo' => 'CREDITO', 
-            'valor' => $amount,
-            'descricao' => $descricao,
-            // CRÍTICO R24: Resolve o problema do campo ausente/nulo
-            'referencia' => $referenciaId ?? 'Sem Referencia', // Usa valor padrão se for NULL
-            'status' => 'concluida',
-        ]);
+Transacao::create([
+                // CRÍTICO R24: Garantia de Cast para INT
+                'id_carteira' => (int) $carteira->id_carteira, 
+                'id_user_autor' => (int) $userId, 
+                'id_aprovador' => (int) $userId, 
+                'uuid' => (string) Str::uuid(),
+                'tipo' => 'CREDITO', 
+                'valor' => $amount,
+                'descricao' => $descricao,
+                // CRÍTICO R24: SOLUÇÃO FINAL: Se o Front-end não envia, DEVE ser NULL (pois a migration é nullable).
+                // O operador ?? 'Sem Referencia' deve ser removido.
+                'referencia' => $referenciaId, // <-- CORREÇÃO: Passa NULL se for NULL.
+                'status' => 'concluida',
+            ]);
 
             return $carteira;
         });
