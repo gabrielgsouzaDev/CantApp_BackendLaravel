@@ -34,7 +34,7 @@ Route::post('users', [UserController::class, 'store'])->name('register'); // Rot
 Route::apiResource('escolas', EscolaController::class)->only(['index', 'show']);
 Route::get('planos', [PlanoController::class, 'index']);
 Route::apiResource('enderecos', EnderecoController::class)->only(['store']); // Criação de endereço pode ser pública dependendo do fluxo de registro
-Route::get('public/cantinas', [CantinaController::class, 'index']);
+Route::get('cantinas', [CantinaController::class, 'index']);
 /*
 |--------------------------------------------------------------------------
 | ROTAS PROTEGIDAS (AUTH:SANCTUM)
@@ -66,7 +66,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     /* ================= CANTINAS ================= */
     Route::get('cantinas/escola/{id_escola}', [CantinaController::class, 'getBySchool']);
-    Route::apiResource('cantinas', CantinaController::class);
+    Route::apiResource('cantinas', CantinaController::class)->except(['index']);
 
     /* ================= PRODUTOS ================= */
     Route::get('cantinas/{id_cantina}/produtos', [ProdutoController::class, 'getByCanteen']);
