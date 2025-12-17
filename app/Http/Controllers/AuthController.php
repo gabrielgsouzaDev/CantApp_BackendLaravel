@@ -24,36 +24,51 @@ class AuthController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws ValidationException
      */
+
     public function login(Request $request)
 {
-    // CÓDIGO TEMPORÁRIO PARA DEBUG
-    try {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string', 
-            'device_name' => 'required|string'
-        ]);
+    // 1. Validação (Se falhar, o Laravel lança 422 automaticamente)
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required|string', 
+        'device_name' => 'required|string'
+    ]);
 
-        if (!Auth::attempt($request->only('email', 'password'))) {
-            throw ValidationException::withMessages(['email' => ['Credenciais inválidas.']]);
-        }
-        
-        $user = Auth::user();
-        
-        // ... O restante da sua lógica
-        
-        // Retorno de sucesso (o try-catch só será executado se houver uma exceção antes desta linha)
-        return response()->json([ /* ... */ ]);
-        
-    } catch (\Exception $e) {
-        // ESSA LINHA É CRÍTICA PARA O DEBUG NO RAILWAY
+    // 2. Tentativa de Autenticação
+    if (!Auth::attempt($request->only('email', 'password'))) {
+        // Se a senha estiver errada, cairá aqui com 422.
         return response()->json([
-            'error' => 'Falha Interna Crítica',
-            'exception_message' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine()
-        ], 500);
+            'message' => 'Credenciais inválidas.',
+            'errors' => ['email' => ['O e-mail ou senha inseridos estão incorretos.']]
+        ], 422);
     }
+    
+    $user = Auth::user();
+
+    if (!$user->ativo) {
+        Auth::logout(); 
+        return response()->json(['message' => 'Conta inativa.'], 403);
+    }
+    
+    // 3. Sucesso: Geração de Token e Mapeamento
+    $token = $user->createToken($request->device_name)->plainTextToken;
+    $role = $user->roles()->first()?->nome_role ?? 'aluno'; 
+
+    return response()->json([
+        'success' => true,
+        'data' => [
+            'token' => $token,
+            'user' => [
+                'id' => $user->id,
+                'nome' => $user->nome, // R58: Garante o nome correto
+                'email' => $user->email,
+                'role' => strtolower($role),
+                'id_escola' => $user->id_escola,
+                'id_cantina' => $user->id_cantina,
+                'ativo' => $user->ativo
+            ]
+        ]
+    ]);
 }
     
     // Logout do token atual
