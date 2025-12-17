@@ -25,59 +25,36 @@ class AuthController extends Controller
      * @throws ValidationException
      */
     public function login(Request $request)
-    {
+{
+    // CÓDIGO TEMPORÁRIO PARA DEBUG
+    try {
         $request->validate([
             'email' => 'required|email',
-            // O Front-end envia 'password', o que está correto para o Auth::attempt padrão do Laravel
             'password' => 'required|string', 
             'device_name' => 'required|string'
         ]);
 
-        // 1. Tenta autenticar o usuário
         if (!Auth::attempt($request->only('email', 'password'))) {
-            throw ValidationException::withMessages([
-                'email' => ['Credenciais inválidas.'],
-            ]);
+            throw ValidationException::withMessages(['email' => ['Credenciais inválidas.']]);
         }
         
-        // 2. Obtém o objeto User
         $user = Auth::user();
-
-        // 3. Verifica se o usuário está ativo (Regra de Negócio)
-        if (!$user->ativo) {
-            // Limpa a sessão criada pelo attempt
-            Auth::logout(); 
-            throw ValidationException::withMessages([
-                'email' => ['Conta inativa. Contate o administrador.'],
-            ]);
-        }
         
-        // 4. Cria token.
-        $token = $user->createToken($request->device_name)->plainTextToken;
-
-        // 5. Determina o Role do usuário
-        // Usa o accessor 'role' se estiver implementado, ou a primeira role do relacionamento
-        $role = $user->roles()->first()?->nome_role ?? 'aluno'; 
+        // ... O restante da sua lógica
         
-        // 6. Retorna o Payload de Resposta
+        // Retorno de sucesso (o try-catch só será executado se houver uma exceção antes desta linha)
+        return response()->json([ /* ... */ ]);
+        
+    } catch (\Exception $e) {
+        // ESSA LINHA É CRÍTICA PARA O DEBUG NO RAILWAY
         return response()->json([
-            'success' => true,
-            'data' => [
-                'token' => $token,
-                'user' => [
-                    'id' => $user->id,
-                    // CRÍTICO R58: Corrigido o campo de $user->name (nulo/ausente) para $user->nome,
-                    // que é o campo real no banco de dados. Isso resolve o R55 no Front-end.
-                    'nome' => $user->nome, 
-                    'email' => $user->email,
-                    'role' => $role,
-                    'id_escola' => $user->id_escola ?? null,
-                    'id_cantina' => $user->id_cantina ?? null,
-                    'ativo' => $user->ativo
-                ]
-            ]
-        ]);
+            'error' => 'Falha Interna Crítica',
+            'exception_message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine()
+        ], 500);
     }
+}
     
     // Logout do token atual
     public function logout(Request $request)
