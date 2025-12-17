@@ -20,12 +20,23 @@ class CantinaController extends Controller
     }
 
     // Listar todas as cantinas
-    public function index()
-    {
-    // A chamada direta à Model agora funciona devido ao import acima.
-    $cantinas = Cantina::where('status', 'ativa')->get(); 
-    return response()->json(['data' => $cantinas]);
+// app/Http/Controllers/CantinaController.php
+
+public function index()
+{
+    try {
+        $cantinas = \App\Models\Cantina::where('status', 'ativa')->get(); 
+        return response()->json(['data' => $cantinas]);
+    } catch (\Exception $e) {
+        // ESSA LINHA É PARA DEBUG. ELA VAI EXPOR O ERRO EXATO.
+        return response()->json([
+            'error_type' => 'Database Error',
+            'error_message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine()
+        ], 500);
     }
+}
 
     // Mostrar uma cantina específica
     public function show($id)
