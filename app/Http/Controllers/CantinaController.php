@@ -20,23 +20,22 @@ class CantinaController extends Controller
     }
 
     // Listar todas as cantinas
-// app/Http/Controllers/CantinaController.php
+    // app/Http/Controllers/CantinaController.php
 
-public function index()
-{
+    public function index()
+    {
     try {
         $cantinas = \App\Models\Cantina::where('status', 'ativa')->get(); 
         return response()->json(['data' => $cantinas]);
     } catch (\Exception $e) {
-        // ESSA LINHA É PARA DEBUG. ELA VAI EXPOR O ERRO EXATO.
+        // ISSO VAI EXPOR O ERRO EXATO. EX: Connection refused.
         return response()->json([
-            'error_type' => 'Database Error',
-            'error_message' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine()
+            'error' => 'Falha Crítica no DB',
+            'exception_message' => $e->getMessage(), // <--- ESTA É A MENSAGEM CHAVE!
+            'code' => $e->getCode(),
         ], 500);
     }
-}
+    }
 
     // Mostrar uma cantina específica
     public function show($id)
